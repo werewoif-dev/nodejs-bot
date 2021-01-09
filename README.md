@@ -12,11 +12,11 @@
 
 ##### 注册
 
-使用 `@bot register` 注册。
+使用 `register` 注册。
 
 注册成功后会被 bot 添加到当局游戏人员名单中。
 
-如续取消报名可使用 `@bot register cancel`。
+如续取消报名可使用 `register cancel`。
 
 只能在游戏未开始时注册。
 
