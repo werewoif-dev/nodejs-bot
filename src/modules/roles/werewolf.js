@@ -1,9 +1,10 @@
 const Mirai = require('node-mirai-sdk');
 const { Plain } = Mirai.MessageComponent;
 
+const Role = require('../role');
 const utils = require('../../utils.js');
 
-class Werewolf {
+class Werewolf extends Role {
 	log() {
 		console.log('[ROLE]', 'Werewolf', ...arguments);
 	}
@@ -12,30 +13,13 @@ class Werewolf {
 		return [Plain('狼人')];
 	}
 
-	addPlayer(player) {
-		this.playerList.push(player);
-	}
-
-	chat(message) {
-		for (let currentPlayer of this.playerList) {
-			currentPlayer.chat(message);
-		}
-	}
-
-	kill(player) {
-		if (!player || !this.nightResolver) {
+	teamChat(player, message) {
+		if (!player || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+			player.chat('teamChat 命令不合法');
 			return;
 		}
 
-		console.log('Kill', player.id);
-		this.nightResolver(player);
-
-		this.nightResolver = undefined;
-		this.nightRejecter = undefined;
-	}
-
-	teamChat(player, message) {
-		this.log('Team Chat', player.id, message);
+		this.log('Team Chat', player.nick, message);
 		for (let currentPlayer of this.playerList) {
 			if (player.id != currentPlayer.id) {
 				currentPlayer.chat(utils.getMessageChains(`(message from ${player.nick}) `, message));
@@ -43,23 +27,42 @@ class Werewolf {
 		}
 	}
 
-	processNight(roundId, playerList) {
+	kill(killer, targetPlayer) {
+		if (!killer || !targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+			killer.chat('kill 命令不合法');
+			return;
+		}
+
+		this.log('Kill', targetPlayer.nick, 'by', killer.nick);
+		for (let currentPlayer of this.playerList) {
+			currentPlayer.chat(utils.getMessageChains(`${killer.nick} 决定杀害 ${targetPlayer.nick}`));
+		}
+
+		this.roundId = null;
+		this.roundType = null;
+		this.nightResolver = undefined;
+		this.nightRejecter = undefined;
+
+		if (targetPlayer.id === -1) {
+			targetPlayer = null;
+		}
+		this.nightResolver(targetPlayer);
+	}
+
+	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
-		this.playerList = playerList;
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
 			this.nightRejecter = reject;
 
-			this.chat('现在是晚上！请狼人决定今晚要杀的人（使用 `kill <qq>` 的格式回复）');
+			this.chat(`现在是第 ${roundId} 个晚上！请狼人决定今晚要杀的人`);
 		});
 	}
 
-	constructor() {
-		this.roundId = null;
-		this.roundType = null;
-		this.playerList = [];
+	constructor(game) {
+		super(game);
 	}
 }
 

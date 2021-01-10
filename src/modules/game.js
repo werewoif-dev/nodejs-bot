@@ -8,6 +8,9 @@ const utils = require('../utils');
 const config = require('../config');
 
 const Player = require('./player');
+const Seer = require('./roles/seer');
+const Witch = require('./roles/witch');
+const Villager = require('./roles/villager');
 const Werewolf = require('./roles/werewolf');
 
 class Game {
@@ -34,18 +37,65 @@ class Game {
 		this.roles[role].addPlayer(player);
 		player.chat(utils.getMessageChains('游戏开始！你的角色是 ', this.roles[role].getDisplayName()));
 	}
+	
+	getTemplate(){
+		const playerNumber = this.playerList.length;
+		for (let template of config.templates) {
+			if (template.length === playerNumber) {
+				return template;
+			}
+		}
+		return null;
+	}
 
 	async processNight(roundId) {
+		this.roundId = roundId;
+		this.roundType = 'night';
+
 		this.chat(`第 ${roundId} 个晚上开始了。`);
-		const killedPlayer = await this.roles.werewolf.processNight(roundId, this.playerList);
 
-		this.chat(`第 ${roundId} 个晚上结束了。`);
-		await sleep(100);
+		// werewolfs' round
+		const killedPlayer = await this.roles.werewolf.processNight(roundId);
 
-		this.chat([Plain('这个晚上 '), At(killedPlayer.id), Plain(' 死了')]);
-		await sleep(100);
+		// the witch's round
+		const { poisonedPlayer, savedPlayer } = await this.roles.witch.processNight(roundId, killedPlayer);
 
-		this.chat('bot 目前只写到了这里，剩下的还在路上');
+		// the seer's round
+		await this.roles.seer.processNight(roundId);
+
+		const diedPlayerList = [];
+		if (killedPlayer && (!savedPlayer || savedPlayer.id !== killedPlayer.id)) {
+			diedPlayerList.push(killedPlayer);
+		}
+		if (poisonedPlayer) {
+			diedPlayerList.push(poisonedPlayer);
+		}
+		arrayShuffle(diedPlayerList);
+
+		let messageChain = [];
+		messageChain.push(Plain(`第 ${roundId} 个晚上结束了。\n`));
+		if (diedPlayerList.length === 0) {
+			messageChain.push(Plain('今天是平安夜'));
+		} else if (diedPlayerList.length === 1) {
+			messageChain.push(Plain('今天晚上 '));
+			messageChain.push(At(diedPlayerList[0].id));
+			messageChain.push(Plain(' 死了'));
+		} else if (diedPlayerList.length === 2) {
+			messageChain.push(Plain('今天晚上 '));
+			messageChain.push(At(diedPlayerList[0].id));
+			messageChain.push(Plain(' 和 '));
+			messageChain.push(At(diedPlayerList[1].id));
+			messageChain.push(Plain(' 死了'));
+		}
+		messageChain.push(Plain('\nbot 目前只写到这里，有什么建议可以联系 memset0 哦 qaq\n'));
+
+		this.chat(messageChain);
+		this.stop();
+	}
+
+	async processDay(roundId) {
+		this.roundId = roundId;
+		this.roundType = 'day';
 	}
 
 	start() {
@@ -61,8 +111,18 @@ class Game {
 		this.processNight(1);
 	}
 
+	stop() {
+		this.started = false;
+	}
+
 	register(id) {
 		console.log('[GAME]', 'Register', id);
+
+		if (this.started) {
+			this.chat([At(id), Plain(' 游戏已经开始了，无法注册')], id);
+			return;
+		}
+
 		let registered = false;
 		for (let registeredPlayer of this.playerList) {
 			if (registeredPlayer.id == id) {
@@ -85,6 +145,12 @@ class Game {
 
 	registerCancel(id) {
 		console.log('[GAME]', 'Register Cancel', id);
+
+		if (this.started) {
+			this.chat([At(id), Plain(' 游戏已经开始了，无法取消注册')], id);
+			return;
+		}
+
 		let index = -1;
 		for (let i in this.playerList) {
 			const registeredPlayer = this.playerList[i];
@@ -111,7 +177,10 @@ class Game {
 		this.playerList = [];
 
 		this.roles = {
-			werewolf: new Werewolf(),
+			werewolf: new Werewolf(this),
+			witch: new Witch(this),
+			seer: new Seer(this),
+			villager: new Villager(this),
 		};
 
 		this.logger = {

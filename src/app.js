@@ -18,11 +18,14 @@ class App {
 			if (messagePlain === 'debug') {
 				this.game.register(2315374205);
 				this.game.register(1405566706);
+				this.game.register(707349985);
 				this.game.start();
 			} else if (messagePlain === 'register') {
 				this.game.register(sender.id);
 			} else if (messagePlain === 'register cancel') {
 				this.game.registerCancel(sender.id);
+			} else if (messagePlain === 'status') {
+				this.game.logger.listAllPlayers();
 			} else if (messagePlain === 'start game') {
 				this.game.start();
 			}
@@ -42,7 +45,7 @@ class App {
 							const targetPlayerId = messagePlain.slice(5);
 							const targetPlayer = targetPlayerId === 'none' ? new Player(-1) : this.game.getPlayer(targetPlayerId);
 							if (targetPlayer) {
-								this.game.roles.werewolf.kill(targetPlayer);
+								this.game.roles.werewolf.kill(player, targetPlayer);
 							} else {
 								reply(`kill 命令格式不正确，你当前的 targetPlayerId 为 ${targetPlayerId}`);
 							}

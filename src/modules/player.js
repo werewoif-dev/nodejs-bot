@@ -25,6 +25,7 @@ class Player {
 
 	constructor(id) {
 		this.id = id;
+		this.alive = true;
 
 		if (id === -1) {
 			this.nick = '<none>';
