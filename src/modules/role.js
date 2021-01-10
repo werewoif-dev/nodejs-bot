@@ -21,12 +21,27 @@ class Role {
 		}
 	}
 
+	resetPlayer() {
+		while (this.playerList.length) {
+			this.playerList.pop();
+		}
+	}
+
 	chat(message) {
 		for (let currentPlayer of this.playerList) {
 			currentPlayer.chat(message);
 		}
 	}
-	
+
+	isAlive() {
+		for (let currentPlayer of this.playerList) {
+			if (currentPlayer.alive) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';

@@ -32,12 +32,12 @@ class Seer extends Role {
 			this.chat(`${targetPlayer.nick} 是好人`);
 		}
 
+		this.nightResolver();
+
 		this.roundId = null;
 		this.roundType = null;
 		this.nightResolver = undefined;
 		this.nightRejecter = undefined;
-
-		this.nightResolver();
 	}
 
 	pass() {
@@ -48,12 +48,12 @@ class Seer extends Role {
 
 		this.log('Pass');
 
+		this.nightResolver();
+
 		this.roundId = null;
 		this.roundType = null;
 		this.nightResolver = undefined;
 		this.nightRejecter = undefined;
-
-		this.nightResolver();
 	}
 
 	processNight(roundId) {
@@ -63,6 +63,10 @@ class Seer extends Role {
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
 			this.nightRejecter = reject;
+
+			if (!this.playerList.length) {
+				resolve();
+			}
 
 			this.chat(`现在是第 ${roundId} 个晚上！`);
 		});

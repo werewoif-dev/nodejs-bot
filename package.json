@@ -4,9 +4,9 @@
   "description": "让你在群里玩狼人杀的 QQ bot。",
   "main": "src/main.js",
   "dependencies": {
-    "array-shuffle": "^2.0.0",
     "lodash": "^4.17.20",
     "node-mirai-sdk": "^0.2.3",
+    "shuffle-array": "^1.0.1",
     "sleep-promise": "^9.1.0",
     "yaml": "^1.10.0"
   },

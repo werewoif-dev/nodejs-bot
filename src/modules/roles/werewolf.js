@@ -38,15 +38,15 @@ class Werewolf extends Role {
 			currentPlayer.chat(utils.getMessageChains(`${killer.nick} 决定杀害 ${targetPlayer.nick}`));
 		}
 
-		this.roundId = null;
-		this.roundType = null;
-		this.nightResolver = undefined;
-		this.nightRejecter = undefined;
-
 		if (targetPlayer.id === -1) {
 			targetPlayer = null;
 		}
 		this.nightResolver(targetPlayer);
+
+		this.roundId = null;
+		this.roundType = null;
+		this.nightResolver = undefined;
+		this.nightRejecter = undefined;
 	}
 
 	processNight(roundId) {

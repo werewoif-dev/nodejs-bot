@@ -13,7 +13,7 @@ class Witch extends Role {
 	}
 
 	poison(targetPlayer) {
-		if (!targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.chat('posion 命令不合法');
 			return;
 		}
@@ -30,11 +30,12 @@ class Witch extends Role {
 			return;
 		}
 
+		this.chat(`你用毒药杀了 ${targetPlayer.nick}`);
 		this.poisonedPlayer = targetPlayer;
 	}
 
 	save(targetPlayer) {
-		if (!targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.chat('save 命令不合法');
 			return;
 		}
@@ -51,11 +52,12 @@ class Witch extends Role {
 			return;
 		}
 
-		if (this.targetPlayer.id !== this.killedPlayer.id) {
+		if (targetPlayer.id !== this.killedPlayer.id) {
 			this.chat('你只能对今晚死亡的人使用解药');
 			return;
 		}
 
+		this.chat(`你用解药救了 ${targetPlayer.nick}`);
 		this.savedPlayer = targetPlayer;
 	}
 
@@ -66,6 +68,7 @@ class Witch extends Role {
 		}
 
 		this.log('Pass');
+		this.chat('你结束了你的回合。');
 
 		if (this.poisonedPlayer) {
 			this.poisoned = true;
@@ -74,15 +77,15 @@ class Witch extends Role {
 			this.saved = true;
 		}
 
-		this.roundId = null;
-		this.roundType = null;
-		this.nightResolver = undefined;
-		this.nightRejecter = undefined;
-
 		this.nightResolver({
 			poisonedPlayer: this.poisonedPlayer,
 			savedPlayer: this.savedPlayer,
 		});
+
+		this.roundId = null;
+		this.roundType = null;
+		this.nightResolver = undefined;
+		this.nightRejecter = undefined;
 	}
 
 	processNight(roundId, killedPlayer) {
@@ -96,10 +99,17 @@ class Witch extends Role {
 			this.nightResolver = resolve;
 			this.nightRejecter = reject;
 
+			if (!this.playerList.length) {
+				resolve({
+					poisonedPlayer: null,
+					savedPlayer: null,
+				});
+			}
+
 			if (killedPlayer) {
-				this.chat([Plain(`现在是第 ${roundId} 个晚上！今天晚上 `), At(killedPlayer.id), Plain(' 死了。')]);
+				this.chat(`现在是第 ${roundId} 个晚上！今天晚上 ${killedPlayer.nick} 死了`);
 			} else {
-				this.chat([Plain(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害。`)]);
+				this.chat(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
 			}
 		});
 	}
