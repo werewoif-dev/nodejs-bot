@@ -2,6 +2,7 @@ const Mirai = require('node-mirai-sdk');
 const { Plain, At } = Mirai.MessageComponent;
 
 const arrayShuffle = require('array-shuffle');
+const sleep = require('sleep-promise');
 
 const utils = require('../utils');
 const config = require('../config');
@@ -13,10 +14,19 @@ class Game {
 
 	chat(message) {
 		if (typeof (message) === 'string') {
-			this.bot.sendGroupMessage([Plain(message)], config.group);
-		} else {
-			this.bot.sendGroupMessage(message, config.group);
+			message = [Plain(message)];
 		}
+		console.log('[CHAT]', 'Group', message);
+		this.bot.sendGroupMessage(message, config.group);
+	}
+
+	getPlayer(id) {
+		for (let player of this.playerList) {
+			if (player.id === parseInt(id)) {
+				return player;
+			}
+		}
+		return null;
 	}
 
 	setRole(player, role) {
@@ -27,7 +37,15 @@ class Game {
 
 	async processNight(roundId) {
 		this.chat(`第 ${roundId} 个晚上开始了。`);
-		await this.roles.werewolf.processNight(this.playerList);
+		const killedPlayer = await this.roles.werewolf.processNight(roundId, this.playerList);
+
+		this.chat(`第 ${roundId} 个晚上结束了。`);
+		await sleep(100);
+
+		this.chat([Plain('这个晚上 '), At(killedPlayer.id), Plain(' 死了')]);
+		await sleep(100);
+
+		this.chat('bot 目前只写到了这里，剩下的还在路上');
 	}
 
 	start() {
@@ -39,6 +57,7 @@ class Game {
 		}
 		// ===== just for debug =====
 
+		this.started = true;
 		this.processNight(1);
 	}
 

@@ -1,9 +1,13 @@
 const Mirai = require('node-mirai-sdk');
-const { Plain, At } = Mirai.MessageComponent;
+const { Plain } = Mirai.MessageComponent;
 
 const utils = require('../../utils.js');
 
 class Werewolf {
+	log() {
+		console.log('[ROLE]', 'Werewolf', ...arguments);
+	}
+
 	getDisplayName() {
 		return [Plain('狼人')];
 	}
@@ -22,6 +26,8 @@ class Werewolf {
 		if (!player || !this.nightResolver) {
 			return;
 		}
+
+		console.log('Kill', player.id);
 		this.nightResolver(player);
 
 		this.nightResolver = undefined;
@@ -29,14 +35,19 @@ class Werewolf {
 	}
 
 	teamChat(player, message) {
+		this.log('Team Chat', player.id, message);
 		for (let currentPlayer of this.playerList) {
 			if (player.id != currentPlayer.id) {
-				currentPlayer.chat(utils.getMessageChains(`message from ${player.nick}`, message));
+				currentPlayer.chat(utils.getMessageChains(`(message from ${player.nick}) `, message));
 			}
 		}
 	}
 
-	processNight(werewolf) {
+	processNight(roundId, playerList) {
+		this.roundId = roundId;
+		this.roundType = 'night';
+		this.playerList = playerList;
+
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
 			this.nightRejecter = reject;
@@ -46,6 +57,8 @@ class Werewolf {
 	}
 
 	constructor() {
+		this.roundId = null;
+		this.roundType = null;
 		this.playerList = [];
 	}
 }

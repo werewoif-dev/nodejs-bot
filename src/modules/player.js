@@ -1,3 +1,5 @@
+const config = require('../config');
+
 class Player {
 
 	getId() {
@@ -13,6 +15,7 @@ class Player {
 	}
 
 	chat(messageChain) {
+		console.log('[CHAT]', this.id, messageChain);
 		global.bot.sendFriendMessage(messageChain, this.id);
 	}
 
@@ -22,7 +25,19 @@ class Player {
 
 	constructor(id) {
 		this.id = id;
-		this.nick = `nick<${id}>`;
+
+		if (id === -1) {
+			this.nick = '<none>';
+		} else {
+			for (let currentId in config.nicks) {
+				if (currentId == id) {
+					this.nick = config.nicks[currentId];
+				}
+			}
+			if (!this.nick) {
+				this.nick = `nick<${id}>`;
+			}
+		}
 	}
 }
 
