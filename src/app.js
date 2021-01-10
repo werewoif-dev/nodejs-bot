@@ -3,12 +3,8 @@ const config = require('./config');
 const Game = require('./modules/game');
 
 class App {
-	mixinBot() {
-		this.bot = bot;
-	}
-
-	onMessage(message) {
-		const { sender, messageChain, reply, quoteReply } = message;
+	async onMessage(message) {
+		const { sender, messageChain, reply } = message;
 		const messagePlain = messageChain.map(messageChainPart => {
 			if (messageChainPart.type === 'Plain') {
 				return messageChainPart.text;
@@ -16,11 +12,13 @@ class App {
 				return '';
 			}
 		}).join('');
+		console.log('[MSG]', message);
+
 		if (sender.group) { // 群内消息
 			if (messagePlain === 'register') {
-				this.game.register(sender.id, quoteReply);
+				this.game.register(sender.id);
 			} else if (messagePlain === 'register cancel') {
-				this.game.registerCancel(sender.id, quoteReply);
+				this.game.registerCancel(sender.id);
 			} else if (messagePlain === 'start game') {
 				this.game.start();
 			}
@@ -32,16 +30,17 @@ class App {
 		}
 	}
 
-	constructor() {
-		this.bot = {};
-		this.game = new Game(this.bot);
+	constructor(bot) {
+		this.bot = bot;
+		this.game = new Game(bot);
+
+		bot.onMessage(async message => {
+			if (message.sender.group && message.sender.group.id !== config.group) {
+				return;
+			}
+			await this.onMessage(message);
+		});
 	}
 }
 
-
-
-if (!global._app) {
-	global._app = app = new App()
-}
-
-module.exports = global._app;
+module.exports = App;

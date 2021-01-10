@@ -8,14 +8,21 @@ class Player {
 		return this.nick;
 	}
 
-	chat(messageChain) {
-		this.bot.sendFriendMessage(messageChain, this.id);
+	getRole() {
+		return this.role;
 	}
 
-	constructor(id, bot) {
+	chat(messageChain) {
+		global.bot.sendFriendMessage(messageChain, this.id);
+	}
+
+	setRole(role) {
+		this.role = role;
+	}
+
+	constructor(id) {
 		this.id = id;
 		this.nick = `nick<${id}>`;
-		this.bot = bot;
 	}
 }
 
