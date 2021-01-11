@@ -11,7 +11,7 @@ class App {
 			} else if (messageChainPart.type === 'At') {
 				return messageChainPart.target;
 			} else {
-				return ' ';
+				return '';
 			}
 		}).join('');
 		console.log('[MSG]', messagePlain);
@@ -32,11 +32,17 @@ class App {
 				this.game.start();
 			} else if (messagePlain === 'stop game') {
 				this.game.stop();
-			} else if (messagePlain.startsWith('vote')) {
-				const targetPlayer = this.game.getPlayer(messagePlain.slice(5));
-				this.game.voter.vote(player, targetPlayer);
-			} else if (messagePlain === 'pass') {
-				this.game.voter.pass(player);
+			} else {
+				const player = this.game.getPlayer(sender.id);
+
+				if (player) {
+					if (messagePlain.startsWith('vote')) {
+						const targetPlayer = this.game.getPlayer(messagePlain.slice(5));
+						this.game.voter.vote(player, targetPlayer);
+					} else if (messagePlain === 'pass') {
+						this.game.voter.pass(player);
+					}
+				}
 			}
 
 		} else { // 私聊消息
@@ -91,8 +97,8 @@ class App {
 				// 不在目标群聊中发送的消息
 				return;
 			}
-			if (!message.sender.group && !this.game.getPlayer(sender.id)) {
-				// 不是参与玩家发送的消息F
+			if (!message.sender.group && !this.game.getPlayer(message.sender.id)) {
+				// 不是游戏中玩家发送的消息
 				return;
 			}
 

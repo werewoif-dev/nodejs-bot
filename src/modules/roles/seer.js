@@ -19,7 +19,7 @@ class Seer extends Role {
 	}
 
 	suspect(targetPlayer) {
-		if (!targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!this.isAlive() || !targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.chat('suspect 命令不合法');
 			return;
 		}
@@ -47,6 +47,7 @@ class Seer extends Role {
 		}
 
 		this.log('Pass');
+		this.chat('你结束了你的回合');
 
 		this.nightResolver();
 
@@ -59,6 +60,8 @@ class Seer extends Role {
 	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
+		
+		this.game.chat('预言家正在决策中...');
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;

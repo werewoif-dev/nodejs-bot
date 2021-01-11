@@ -13,7 +13,7 @@ class Witch extends Role {
 	}
 
 	poison(targetPlayer) {
-		if (!targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!this.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.chat('posion 命令不合法');
 			return;
 		}
@@ -35,7 +35,7 @@ class Witch extends Role {
 	}
 
 	save(targetPlayer) {
-		if (!targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!this.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.chat('save 命令不合法');
 			return;
 		}
@@ -68,7 +68,7 @@ class Witch extends Role {
 		}
 
 		this.log('Pass');
-		this.chat('你结束了你的回合。');
+		this.chat('你结束了你的回合');
 
 		if (this.poisonedPlayer) {
 			this.poisoned = true;
@@ -94,6 +94,8 @@ class Witch extends Role {
 
 		this.poisonedPlayer = null;
 		this.killedPlayer = killedPlayer;
+
+		this.game.chat('女巫正在决策中...');
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;

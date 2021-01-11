@@ -14,7 +14,7 @@ class Werewolf extends Role {
 	}
 
 	teamChat(player, message) {
-		if (!player || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			player.chat('teamChat 命令不合法');
 			return;
 		}
@@ -28,7 +28,7 @@ class Werewolf extends Role {
 	}
 
 	kill(killer, targetPlayer) {
-		if (!killer || !targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!killer || !killer.alive || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			killer.chat('kill 命令不合法');
 			return;
 		}
@@ -38,10 +38,26 @@ class Werewolf extends Role {
 			currentPlayer.chat(utils.getMessageChains(`${killer.nick} 决定杀害 ${targetPlayer.nick}`));
 		}
 
-		if (targetPlayer.id === -1) {
-			targetPlayer = null;
-		}
 		this.nightResolver(targetPlayer);
+
+		this.roundId = null;
+		this.roundType = null;
+		this.nightResolver = undefined;
+		this.nightRejecter = undefined;
+	}
+
+	pass(player) {
+		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+			player.chat('Pass 命令不合法');
+			return;
+		}
+
+		this.log('Pass', 'by', player.nick);
+		for (let currentPlayer of this.playerList) {
+			currentPlayer.chat(utils.getMessageChains(`${player.nick} 决定跳过本回合`));
+		}
+
+		this.nightResolver(null);
 
 		this.roundId = null;
 		this.roundType = null;
@@ -52,6 +68,8 @@ class Werewolf extends Role {
 	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
+		
+		this.game.chat('狼人正在决策中...');
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;

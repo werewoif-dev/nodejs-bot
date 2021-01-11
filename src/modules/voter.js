@@ -3,14 +3,21 @@ const { Plain, At } = Mirai.MessageComponent;
 
 class Voter {
 
+	log() {
+		console.log('[LOG]', ...arguments);
+	}
+
 	isEnd() {
-		let resultNumber = this.result.length;
+		let resultNumber = Object.keys(this.result).length;
 		let alivePlayerNumber = 0;
 		for (let player of this.game.playerList) {
 			if (player.alive) {
 				alivePlayerNumber += 1;
 			}
 		}
+
+		this.log('result', this.result);
+		this.log(resultNumber, '/', alivePlayerNumber);
 
 		if (alivePlayerNumber === resultNumber) {
 			return true;
@@ -33,11 +40,15 @@ class Voter {
 			return;
 		}
 
-		if (Object.keys(this.result).includes(player.id)) {
+		if (Object.keys(this.result).includes(String(player.id))) {
 			this.game.chat([At(player.id), Plain(' 你已经投票 / 弃权过了')]);
+			return;
 		}
 
-		this.result[player.id] = targetPlayer;
+		this.log('Vote', player.nick, 'To', targetPlayer.nick);
+
+		this.result[String(player.id)] = targetPlayer;
+		this.game.chat([At(player.id), Plain(' 你投票给了 '), At(targetPlayer.id)]);
 		if (this.isEnd()) {
 			this.end();
 		}
@@ -53,7 +64,15 @@ class Voter {
 			return;
 		}
 
-		this.result[player.id] = null;
+		if (Object.keys(this.result).includes(String(player.id))) {
+			this.game.chat([At(player.id), Plain(' 你已经投票 / 弃权过了')]);
+			return;
+		}
+
+		this.log('Pass', player.nick);
+
+		this.result[String(player.id)] = null;
+		this.game.chat([At(player.id), Plain(' 你放弃了你的投票权')]);
 		if (this.isEnd()) {
 			this.end();
 		}
@@ -65,6 +84,7 @@ class Voter {
 		}
 
 		this.started = true;
+		this.result = {};
 		return new Promise((resolve, reject) => {
 			this.resolver = resolve;
 			this.rejecter = reject;
@@ -73,21 +93,31 @@ class Voter {
 
 	end() {
 		let voteCounter = {};
-		for (let targetPlayer of this.result) {
+		for (let playerId in this.result) {
+			const targetPlayer = this.result[playerId];
 			if (targetPlayer) {
-				voteCounter[targetPlayer.id] += 1;
+				if (voteCounter[targetPlayer.id]) {
+					voteCounter[targetPlayer.id] += 1;
+				} else {
+					voteCounter[targetPlayer.id] = 1;
+				}
 			}
 		}
+		this.log('End', voteCounter);
 
 		let response = null;
 		let maxVoteNumber = -1;
-		for (let targetPlayerId of voteCounter) {
+		for (let targetPlayerId in voteCounter) {
 			let voteNumber = voteCounter[targetPlayerId];
+			this.log('>', targetPlayerId, voteNumber);
 			if (voteNumber > maxVoteNumber) {
 				maxVoteNumber = voteNumber;
 				response = this.game.getPlayer(targetPlayerId);
+			} else if (voteNumber == maxVoteNumber) {
+				response = null;
 			}
 		}
+		this.log(response, maxVoteNumber);
 
 		this.started = false;
 		this.resolver(response);

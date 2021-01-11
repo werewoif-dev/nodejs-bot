@@ -113,17 +113,21 @@ class Game {
 	async processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
+		await sleep(1000);
 
 		this.chat(`第 ${roundId} 个晚上开始了`);
 
 		// werewolfs' round
 		const killedPlayer = await this.roles.werewolf.processNight(roundId);
+		await sleep(500);
 
 		// the witch's round
 		const { poisonedPlayer, savedPlayer } = await this.roles.witch.processNight(roundId, killedPlayer);
+		await sleep(500);
 
 		// the seer's round
 		await this.roles.seer.processNight(roundId);
+		await sleep(500);
 
 		const diedPlayerList = [];
 		if (killedPlayer && (!savedPlayer || savedPlayer.id !== killedPlayer.id)) {
@@ -138,7 +142,7 @@ class Game {
 		shuffle(diedPlayerList);
 
 		let message = [];
-		message.push(`第 ${roundId} 个晚上结束了\n`);
+		message.push(`第 ${roundId} 个晚上结束了，`);
 		if (diedPlayerList.length === 0) {
 			message.push('今天是平安夜');
 		} else if (diedPlayerList.length === 1) {
@@ -159,11 +163,13 @@ class Game {
 	async processDay(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'day';
+		await sleep(1000);
 
-		this.chat('请进行投票');
+		this.chat(`第 ${roundId} 个白天开始了，请进行投票`);
 		let voteResult = await this.voter.next();
 
 		if (!voteResult) {
+			await sleep(500);
 			this.chat('第一轮投票没有结果，请发言并进行第二轮投票');
 			voteResult = await this.voter.next();
 		}
@@ -208,7 +214,7 @@ class Game {
 
 	stop() {
 		let message = [];
-		message.push('游戏结束！\n存活玩家：\n');
+		message.push('游戏结束！\n\n存活玩家：\n');
 		for (let player of this.playerList) {
 			if (player.alive) {
 				message.push(['<', this.roles[player.role].getDisplayName(), '> ', player.nick, ' ', At(player.id), '\n']);
@@ -220,6 +226,7 @@ class Game {
 				message.push(['<', this.roles[player.role].getDisplayName(), '> ', player.nick, ' ', At(player.id), '\n']);
 			}
 		}
+		message.push('感谢你的游玩');
 		this.chat(utils.getMessageChains(message));
 
 		this.started = false;
