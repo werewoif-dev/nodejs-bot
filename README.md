@@ -1,4 +1,4 @@
-# QQbot-The-Werewolves-of-Millers-Hollow
+# werewolf-bot
 
 让你在群里玩狼人杀的 QQbot。
 

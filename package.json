@@ -1,6 +1,6 @@
 {
-  "name": "qqbot-the-werewolves-of-millers-hollow",
-  "version": "1.0.0",
+  "name": "werewolf-bot",
+  "version": "1.1.0",
   "description": "让你在群里玩狼人杀的 QQ bot。",
   "main": "src/main.js",
   "dependencies": {
@@ -16,12 +16,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/memset0/QQbot-The-Werewolves-of-Millers-Hollow.git"
+    "url": "git+https://github.com/memset0/werewolf-bot.git"
   },
   "author": "memset0",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/memset0/QQbot-The-Werewolves-of-Millers-Hollow/issues"
+    "url": "https://github.com/memset0/werewolf-bot/issues"
   },
-  "homepage": "https://github.com/memset0/QQbot-The-Werewolves-of-Millers-Hollow#readme"
+  "homepage": "https://github.com/memset0/werewolf-bot#readme"
 }
