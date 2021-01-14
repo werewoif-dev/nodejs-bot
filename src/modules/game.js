@@ -83,31 +83,125 @@ class Game {
 
 
 	isEnd() {
-		let flag
 
-		// 如果所有好人都死了
-		flag = false;
-		for (let player of this.playerList) {
-			if (player.role !== 'werewolf' && player.alive) {
-				flag = true;
+		if (config.condition === 'all') {
+			let flag
+			let counter
+
+			// 如果所有好人都死了
+			flag = false;
+			for (let player of this.playerList) {
+				if (player.role !== 'werewolf' && player.alive) {
+					flag = true;
+				}
+			}
+			if (!flag) {
+				return {
+					res: true,
+					winner: '狼人',
+					message: '所有好人已经出局',
+				};
+			}
+
+			// 如果所有狼人都死了
+			flag = false;
+			for (let player of this.playerList) {
+				if (player.role === 'werewolf' && player.alive) {
+					flag = true;
+				}
+			}
+			if (!flag) {
+				return {
+					res: true,
+					winner: '好人',
+					message: '所有狼人已经出局'
+				};
+			}
+
+			// 如果狼人的数量大于等于好人的数量
+			counter = 0;
+			for (let player of this.playerList) {
+				if (player.alive) {
+					if (player.role === 'werewolf') {
+						counter++;
+					} else {
+						counter--;
+					}
+				}
+			}
+			if (counter >= 0) {
+				return {
+					res: true,
+					winner: '狼人',
+					message: '未出局的好人数量小于等于狼人数量'
+				};
+			}
+
+		} else if (config.condition === 'part') {
+			let flag_1
+			let flag_2
+
+			// 如果这局有村民且所有村民都死了
+			flag_1 = false;
+			flag_2 = false;
+			for (let player of this.playerList) {
+				if (player.role === 'villager') {
+					flag_1 = true;
+					if (player.alive) {
+						flag_2 = true;
+					}
+				}
+			}
+			if (flag_1 && !flag_2) {
+				return {
+					res: true,
+					winner: '狼人',
+					message: '所有村民已经出局'
+				};
+			}
+
+			// 如果这局有神且所有神都死了
+			flag_1 = false;
+			flag_2 = false;
+			for (let player of this.playerList) {
+				if (player.role !== 'werewolf' && player.role !== 'villager') {
+					flag_1 = true;
+					if (player.alive) {
+						flag_2 = true;
+					}
+				}
+			}
+			if (flag_1 && !flag_2) {
+				return {
+					res: true,
+					winner: '狼人',
+					message: '所有神已经出局'
+				};
+			}
+
+			// 如果所有狼人都死了
+			flag_2 = false;
+			for (let player of this.playerList) {
+				if (player.role === 'werewolf' && player.alive) {
+					flag_2 = true;
+				}
+			}
+			if (!flag_2) {
+				return {
+					res: true,
+					winner: '好人',
+					message: '所有狼人已经出局'
+				};
+			}
+
+
+		} else {
+			return {
+				res: false,
+				winner: null,
+				error: '没有合法的获胜条件',
 			}
 		}
-		if (!flag) {
-			return true;
-		}
-
-		// 如果所有坏人都死了
-		flag = false;
-		for (let player of this.playerList) {
-			if (player.role === 'werewolf' && player.alive) {
-				flag = true;
-			}
-		}
-		if (!flag) {
-			return true;
-		}
-
-		return false;
 	}
 
 	async processNight(roundId) {
@@ -153,7 +247,7 @@ class Game {
 
 		this.chat(utils.getMessageChains(message));
 
-		if (this.isEnd()) {
+		if (this.isEnd().res) {
 			this.stop();
 		} else {
 			await this.processDay(roundId);
@@ -181,7 +275,7 @@ class Game {
 			this.chat('投票结束，没有人出局');
 		}
 
-		if (this.isEnd()) {
+		if (this.isEnd().res) {
 			this.stop();
 		} else {
 			await this.processNight(roundId + 1);
@@ -212,9 +306,13 @@ class Game {
 		this.processNight(1);
 	}
 
-	stop() {
+	stop(result = null) {
+		if (!result) {
+			result = this.isEnd();
+		}
+
 		let message = [];
-		message.push('游戏结束！\n\n存活玩家：\n');
+		message.push(`游戏结束！\n因为 ${result.message}，${result.winner}获得胜利\n存活玩家：\n`);
 		for (let player of this.playerList) {
 			if (player.alive) {
 				message.push(['<', this.roles[player.role].getDisplayName(), '> ', player.nick, ' ', At(player.id), '\n']);
