@@ -55,6 +55,11 @@ class Game {
 			}
 		}
 		for (let player of this.playerList) {
+			if (player.place === parseInt(input)) {
+				return player;
+			}
+		}
+		for (let player of this.playerList) {
 			if (player.nick === String(input)) {
 				return player;
 			}
@@ -82,7 +87,7 @@ class Game {
 
 
 
-	isEnd() {
+	checkWinCondition() {
 
 		if (config.condition === 'all') {
 			let flag
@@ -247,7 +252,7 @@ class Game {
 
 		this.chat(utils.getMessageChains(message));
 
-		if (this.isEnd().res) {
+		if (this.checkWinCondition().res) {
 			this.stop();
 		} else {
 			await this.processDay(roundId);
@@ -275,7 +280,7 @@ class Game {
 			this.chat('投票结束，没有人出局');
 		}
 
-		if (this.isEnd().res) {
+		if (this.checkWinCondition().res) {
 			this.stop();
 		} else {
 			await this.processNight(roundId + 1);
@@ -288,17 +293,19 @@ class Game {
 			return;
 		}
 
-		shuffle(this.playerList);
 		for (let roleName in this.roles) {
 			const roleClass = this.roles[roleName];
 			roleClass.resetPlayer();
 		}
-		shuffle(this.playerList);
 
-		for (let i in this.getTemplate()) {
+		let roleList = this.getTemplate();
+		shuffle(roleList);
+
+		for (let i in roleList) {
 			const player = this.playerList[i];
-			const role = this.getTemplate()[i];
+			const role = roleList[i];
 
+			player.setPlace(i + 1);
 			this.setRole(player, role);
 		}
 
@@ -308,7 +315,7 @@ class Game {
 
 	stop(result = null) {
 		if (!result) {
-			result = this.isEnd();
+			result = this.checkWinCondition();
 		}
 
 		let message = [];
@@ -403,7 +410,7 @@ class Game {
 					messageChain.push(Plain(`已经注册的玩家有 ${this.playerList.length} 个：\n`));
 					for (let i in this.playerList) {
 						const player = this.playerList[i];
-						messageChain.push(Plain(`${i}. ${player.nick}`));
+						messageChain.push(Plain(`${i + 1}. ${player.nick}`));
 						messageChain.push(At(player.id));
 						messageChain.push(Plain('\n'));
 					}

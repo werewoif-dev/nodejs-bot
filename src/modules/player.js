@@ -14,6 +14,10 @@ class Player {
 		return this.role;
 	}
 
+	getPlace() {
+		return this.place;
+	}
+
 	chat(messageChain) {
 		console.log('[CHAT]', this.id, messageChain);
 		global.bot.sendFriendMessage(messageChain, this.id);
@@ -23,9 +27,16 @@ class Player {
 		this.role = role;
 	}
 
+	setPlace(place) {
+		this.place = place;
+	}
+
 	constructor(id) {
 		this.id = id;
 		this.alive = true;
+
+		this.role = null;
+		this.place = null;
 
 		if (id === -1) {
 			this.nick = '<none>';
