@@ -28,27 +28,27 @@ class Voter {
 
 	vote(player, targetPlayer) {
 		if (!this.resolver || !this.rejecter) {
-			this.game.chat([At(player.id), Plain(' 投票未开始')]);
+			player.chat('投票未开始');
 			return;
 		}
 		if (!player.alive) {
-			this.game.chat([At(player.id), Plain(' 你没有投票权限')]);
+			player.chat('你已出局，没有投票权限');
 			return;
 		}
 		if (!targetPlayer || !targetPlayer.alive) {
-			this.game.chat([At(player.id), Plain(' 投票不合法')]);
+			player.chat('投票不合法');
 			return;
 		}
 
 		if (Object.keys(this.result).includes(String(player.id))) {
-			this.game.chat([At(player.id), Plain(' 你已经投票 / 弃权过了')]);
+			player.chat('你已经投票 / 弃权过了');
 			return;
 		}
 
 		this.log('Vote', player.nick, 'To', targetPlayer.nick);
 
 		this.result[String(player.id)] = targetPlayer;
-		this.game.chat([At(player.id), Plain(' 你投票给了 '), At(targetPlayer.id)]);
+		player.chat(`你投票给了 ${targetPlayer.nick}`);
 		if (this.isEnd()) {
 			this.end();
 		}
@@ -56,23 +56,23 @@ class Voter {
 
 	pass(player) {
 		if (!this.resolver || !this.rejecter) {
-			this.game.chat([At(player.id), Plain(' 投票未开始')]);
+			player.chat('投票未开始');
 			return;
 		}
 		if (!player.alive) {
-			this.game.chat([At(player.id), Plain(' 你没有投票权限')]);
+			player.chat('你没有投票权限');
 			return;
 		}
 
 		if (Object.keys(this.result).includes(String(player.id))) {
-			this.game.chat([At(player.id), Plain(' 你已经投票 / 弃权过了')]);
+			player.chat('你已经投票 / 弃权过了');
 			return;
 		}
 
 		this.log('Pass', player.nick);
 
 		this.result[String(player.id)] = null;
-		this.game.chat([At(player.id), Plain(' 你放弃了你的投票权')]);
+		player.chat('你放弃了你的投票权');
 		if (this.isEnd()) {
 			this.end();
 		}
@@ -93,13 +93,16 @@ class Voter {
 
 	end() {
 		let voteCounter = {};
+		let countResult = [];
 		for (let playerId in this.result) {
 			const targetPlayer = this.result[playerId];
 			if (targetPlayer) {
 				if (voteCounter[targetPlayer.id]) {
 					voteCounter[targetPlayer.id] += 1;
+					countResult[targetPlayer.id].push(this.game.getPlayer(playerId));
 				} else {
 					voteCounter[targetPlayer.id] = 1;
+					countResult[targetPlayer.id] = [this.game.getPlayer(playerId)];
 				}
 			}
 		}
@@ -118,6 +121,8 @@ class Voter {
 			}
 		}
 		this.log(response, maxVoteNumber);
+
+		this.game.logger.listVotes(this.result, countResult);
 
 		this.started = false;
 		this.resolver(response);

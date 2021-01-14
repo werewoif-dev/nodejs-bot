@@ -35,14 +35,6 @@ class App {
 			} else {
 				const player = this.game.getPlayer(sender.id);
 
-				if (player) {
-					if (messagePlain.startsWith('vote')) {
-						const targetPlayer = this.game.getPlayer(messagePlain.slice(5));
-						this.game.voter.vote(player, targetPlayer);
-					} else if (messagePlain === 'pass') {
-						this.game.voter.pass(player);
-					}
-				}
 			}
 
 		} else { // 私聊消息
@@ -82,6 +74,13 @@ class App {
 						} else if (messagePlain === 'pass') {
 							this.game.roles.seer.pass();
 						}
+					}
+
+					if (messagePlain.startsWith('vote ')) {
+						const targetPlayer = this.game.getPlayer(messagePlain.slice(5));
+						this.game.voter.vote(player, targetPlayer);
+					} else if (messagePlain === 'votepass') {
+						this.game.voter.pass(player);
 					}
 				}
 			}

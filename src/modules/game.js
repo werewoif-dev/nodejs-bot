@@ -405,20 +405,46 @@ class Game {
 
 		this.logger = {
 			listAllPlayers: () => {
-				let messageChain = [];
+				let message = [];
 				if (this.playerList.length) {
-					messageChain.push(Plain(`已经注册的玩家有 ${this.playerList.length} 个：\n`));
+					message.push(`已经注册的玩家有 ${this.playerList.length} 个：\n`);
 					for (let i in this.playerList) {
 						const player = this.playerList[i];
-						messageChain.push(Plain(`${i + 1}. ${player.nick}`));
-						messageChain.push(At(player.id));
-						messageChain.push(Plain('\n'));
+						message.push([`${i + 1}. ${player.nick}(`, At(player.id), ')']);
+						if (this.started) {
+							message.push(` [${player.alive ? '存活' : '出局'}]`);
+						}
+						message.push('\n');
 					}
 				} else {
-					messageChain.push(Plain('当前没有玩家注册'));
+					message.push('当前没有玩家注册');
 				}
-				this.chat(messageChain);
-			}
+				this.chat(utils.getMessageChains(message));
+			},
+
+			listVotes: (voteResult, countResult) => {
+				let message = [];
+				message.push('本轮票型为');
+				for (let player of this.playerList) {
+					const targetPlayer = voteResult[player.id];
+					message.push([player.nick, ' → ', targetPlayer.nick]);
+					message.push('\n');
+				}
+
+				message.push('\n本轮票数统计');
+				for (let playerId in countResult) {
+					const player = this.getPlayer(playerId);
+					message.push([player.nick, ` 获得 ${countResult[playerId].length} 票，来自：`]);
+					for (let index in countResult[playerId]) {
+						message.push(countResult[playerId][index].nick);
+						if (index + 1 !== countResult[playerId].length) {
+							message.push('，');
+						}
+					}
+				}
+
+				this.chat(utils.getMessageChains(message));
+			},
 		}
 	}
 }
