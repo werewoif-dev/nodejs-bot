@@ -108,10 +108,14 @@ class Witch extends Role {
 				});
 			}
 
-			if (killedPlayer) {
-				this.chat(`现在是第 ${roundId} 个晚上！今天晚上 ${killedPlayer.nick} 死了`);
+			if (!this.poisoned) {
+				if (killedPlayer) {
+					this.chat(`现在是第 ${roundId} 个晚上！今天晚上 ${killedPlayer.nick} 死了`);
+				} else {
+					this.chat(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
+				}
 			} else {
-				this.chat(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
+				this.chat(`现在是第 ${roundId} 个晚上！`);
 			}
 		});
 	}
