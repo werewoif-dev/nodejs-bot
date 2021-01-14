@@ -115,7 +115,7 @@ class Witch extends Role {
 					this.chat(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
 				}
 			} else {
-				this.chat(`现在是第 ${roundId} 个晚上！`);
+				this.chat(`现在是第 ${roundId} 个晚上`);
 			}
 		});
 	}

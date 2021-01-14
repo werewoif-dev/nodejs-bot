@@ -71,7 +71,7 @@ class Seer extends Role {
 				resolve();
 			}
 
-			this.chat(`现在是第 ${roundId} 个晚上！`);
+			this.chat(`现在是第 ${roundId} 个晚上`);
 		});
 	}
 

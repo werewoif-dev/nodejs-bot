@@ -29,6 +29,7 @@ class Player {
 
 	setPlace(place) {
 		this.place = place;
+		this.nick = `nick #${place}`;
 	}
 
 	constructor(id) {

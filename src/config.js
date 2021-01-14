@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const YAML = require('YAML');
 
-const config_dir = path.join(__dirname, '../config.yml');
-const config_parser = YAML.parse;
+const configDir = path.join(__dirname, '../config.yml');
+const configParser = YAML.parse;
 
-const config = config_parser(fs.readFileSync(config_dir).toString());
+const config = configParser(fs.readFileSync(configDir).toString());
 
 module.exports = config;

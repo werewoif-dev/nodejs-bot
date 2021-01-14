@@ -48,7 +48,7 @@ class Werewolf extends Role {
 
 	pass(player) {
 		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			player.chat('Pass 命令不合法');
+			player.chat('pass 命令不合法');
 			return;
 		}
 
