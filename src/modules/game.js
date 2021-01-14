@@ -71,7 +71,7 @@ class Game {
 		console.log('[ROLE]', 'Set', player.nick, 'To', role);
 		player.setRole(role);
 		this.roles[role].addPlayer(player);
-		player.chat(utils.getMessageChains('游戏开始！你的角色是 ', this.roles[role].getDisplayName()));
+		player.chat(utils.getFormattedMessageChain('游戏开始！你的角色是 ', this.roles[role].getDisplayName()));
 	}
 
 	getTemplate() {
@@ -250,7 +250,7 @@ class Game {
 			message.push(['今天晚上 ', At(diedPlayerList[0].id), ' 和 ', At(diedPlayerList[1].id), ' 死了']);
 		}
 
-		this.chat(utils.getMessageChains(message));
+		this.chat(utils.getFormattedMessageChain(message));
 
 		if (this.checkWinCondition().res) {
 			this.stop();
@@ -332,7 +332,7 @@ class Game {
 			}
 		}
 		message.push('感谢你的游玩');
-		this.chat(utils.getMessageChains(message));
+		this.chat(utils.getFormattedMessageChain(message));
 
 		this.started = false;
 		this.playerList = [];
@@ -419,7 +419,7 @@ class Game {
 				} else {
 					message.push('当前没有玩家注册');
 				}
-				this.chat(utils.getMessageChains(message));
+				this.chat(utils.getFormattedMessageChain(message));
 			},
 
 			listVotes: (voteResult, countResult) => {
@@ -443,7 +443,7 @@ class Game {
 					}
 				}
 
-				this.chat(utils.getMessageChains(message));
+				this.chat(utils.getFormattedMessageChain(message));
 			},
 		}
 	}

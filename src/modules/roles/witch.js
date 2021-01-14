@@ -125,6 +125,13 @@ class Witch extends Role {
 
 		this.saved = false;
 		this.poisoned = false;
+
+		this.helpMessage = [
+			'poison <player>：使用毒药毒死 <player>',
+			'save <player>: 使用解药复活 <player>',
+			'pass：结束当前回合',
+			'注意：你的毒药和解药各只有一瓶；当你使用过解药后，你将不会看到每晚的死亡报告；无论是否用药、是否有药和女巫是否存活，都需要用 pass 命令结束你的操作回合',
+		];
 	}
 }
 

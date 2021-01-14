@@ -76,7 +76,9 @@ class App {
 						}
 					}
 
-					if (messagePlain.startsWith('vote ')) {
+					if (messagePlain === 'help') {
+						this.game.roles[player.role].help(player);
+					} else if (messagePlain.startsWith('vote ')) {
 						const targetPlayer = this.game.getPlayer(messagePlain.slice(5));
 						this.game.voter.vote(player, targetPlayer);
 					} else if (messagePlain === 'votepass') {

@@ -77,6 +77,12 @@ class Seer extends Role {
 
 	constructor(game) {
 		super(game);
+
+		this.helpMessage =[
+			'suspect <player>：查验 <player> 是好人还是坏人',
+			'pass：跳过查验',
+			'注意：使用 suspect 或 pass 命令后，查验回合立即结束；无论是否存活，都需要用 pass 命令你的操作回合',
+		];
 	}
 }
 
