@@ -1,7 +1,8 @@
+const sleep = require('sleep-promise');
+
 const utils = require('../utils');
 
 class Role {
-
 	addPlayer(player) {
 		this.playerList.push(player);
 	}
@@ -29,9 +30,9 @@ class Role {
 		}
 	}
 
-	chat(message) {
+	send(message) {
 		for (let currentPlayer of this.playerList) {
-			currentPlayer.chat(message);
+			currentPlayer.send(message);
 		}
 	}
 
@@ -50,22 +51,35 @@ class Role {
 		console.warn('WARN! Function `processNight` undefined.');
 	}
 
-	help(player) {
+	async help(player) {
 		if (!this.helpMessage || !this.helpMessage.length) {
-			player.chat('当前角色暂时没有帮助信息');
+			player.send('当前角色暂时没有帮助信息');
 			return;
 		}
 
-		utils.chatByInterval(this.player.chat, this.helpMessage);
+		for (let message of this.helpMessage) {
+			await player.send(message);
+			await sleep(100);
+		}
+	}
+
+	getName() {
+		return this.name || this.displayName.replace(/\[CQ.+?\]/g, '');
+	}
+
+	getDisplayName() {
+		return this.displayName || this.name;
 	}
 
 	constructor(game) {
 		this.game = game;
+		this.sendGroup = (message) => this.game.sendGroup(message);
 
 		this.roundId = null;
 		this.roundType = null;
 
 		this.playerList = [];
+
 	}
 }
 

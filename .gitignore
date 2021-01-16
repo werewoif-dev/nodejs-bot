@@ -1,4 +1,5 @@
 config.yml
+koishi.config.js
 
 # Logs
 logs

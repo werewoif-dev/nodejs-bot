@@ -1,11 +1,8 @@
-const Mirai = require('node-mirai-sdk');
-const { Plain, At } = Mirai.MessageComponent;
-
 const shuffle = require('shuffle-array');
 const sleep = require('sleep-promise');
 
 const utils = require('../utils');
-const config = require('../config');
+const config = require('../../config');
 
 const Player = require('./player');
 const Voter = require('./voter');
@@ -20,12 +17,21 @@ class Game {
 		console.log('[GAME]', ...arguments);
 	}
 
-	chat(message) {
-		if (typeof (message) === 'string') {
-			message = [Plain(message)];
-		}
+	async sendGroup(message) {
 		console.log('[CHAT]', 'Group', message);
-		this.bot.sendGroupMessage(message, config.group);
+		return await this.bot.sendGroupMsg(config.group, message);
+	}
+
+	async sendPlayer(message) {
+		if (typeof message === 'function') {
+			return await Promise.all(this.playerList.map(player => {
+				this.bot.sendPrivateMessage(player.id, message(player));
+			}));
+		} else {
+			return await Promise.all(this.playerList.map(player => {
+				this.bot.sendPrivateMessage(player.id, message);
+			}));
+		}
 	}
 
 	addPlayer(player) {
@@ -64,14 +70,19 @@ class Game {
 				return player;
 			}
 		}
+		for (let player of this.playerList) {
+			if (player.displayName === String(input)) {
+				return player;
+			}
+		}
 		return null;
 	}
 
-	setRole(player, role) {
-		console.log('[ROLE]', 'Set', player.nick, 'To', role);
+	async setRole(player, role) {
+		console.log('[ROLE]', 'Set', player.displayName, 'To', role);
 		player.setRole(role);
 		this.roles[role].addPlayer(player);
-		player.chat(utils.getFormattedMessageChain('游戏开始！你的角色是 ', this.roles[role].getDisplayName()));
+		await player.send(`游戏开始！你的角色是 ${this.roles[role].getDisplayName()}`);
 	}
 
 	getTemplate() {
@@ -85,11 +96,8 @@ class Game {
 	}
 
 
-
-
 	checkWinCondition() {
-
-		if (config.condition === 'all') {
+		if (config.role.winCondition === 'all') {
 			let flag
 			let counter
 
@@ -142,7 +150,7 @@ class Game {
 				};
 			}
 
-		} else if (config.condition === 'part') {
+		} else if (config.role.winCondition === 'part') {
 			let flag_1
 			let flag_2
 
@@ -212,9 +220,7 @@ class Game {
 	async processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
-		await sleep(1000);
-
-		this.chat(`第 ${roundId} 个晚上开始了`);
+		await this.sendGroup(`第 ${roundId} 个晚上开始了`);
 
 		// werewolfs' round
 		const killedPlayer = await this.roles.werewolf.processNight(roundId);
@@ -240,20 +246,18 @@ class Game {
 		}
 		shuffle(diedPlayerList);
 
-		let message = [];
-		message.push(`第 ${roundId} 个晚上结束了，`);
+		let message = `第 ${roundId} 个晚上结束了，`;
 		if (diedPlayerList.length === 0) {
-			message.push('今天是平安夜');
+			message += `今天是平安夜`;
 		} else if (diedPlayerList.length === 1) {
-			message.push(['今天晚上 ', At(diedPlayerList[0].id), ' 死了']);
+			message += `今天晚上 [CQ:at,qq=${diedPlayerList[0].id}] 死了`;
 		} else if (diedPlayerList.length === 2) {
-			message.push(['今天晚上 ', At(diedPlayerList[0].id), ' 和 ', At(diedPlayerList[1].id), ' 死了']);
+			message += `今天晚上 [CQ:at,qq=${diedPlayerList[0].id}] 和 [CQ:at,qq=${diedPlayerList[1].id}] 死了`;
 		}
-
-		this.chat(utils.getFormattedMessageChain(message));
+		await this.sendGroup(message);
 
 		if (this.checkWinCondition().res) {
-			this.stop();
+			await this.stop();
 		} else {
 			await this.processDay(roundId);
 		}
@@ -262,34 +266,36 @@ class Game {
 	async processDay(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'day';
-		await sleep(1000);
 
-		this.chat(`第 ${roundId} 个白天开始了，请进行投票`);
+		await this.sendGroup(`第 ${roundId} 个白天开始了，请进行投票`);
 		let voteResult = await this.voter.next();
 
 		if (!voteResult) {
-			await sleep(500);
-			this.chat('第一轮投票没有结果，请发言并进行第二轮投票');
+			await this.sendGroup('第一轮投票没有结果，请发言并进行第二轮投票');
 			voteResult = await this.voter.next();
 		}
 
 		if (voteResult) {
 			voteResult.alive = false;
-			this.chat(`投票结束，${voteResult.nick} 出局了`);
+			await this.sendGroup(`投票结束，${voteResult.displayName} 出局了`);
 		} else {
-			this.chat('投票结束，没有人出局');
+			await this.sendGroup('投票结束，没有人出局');
 		}
 
 		if (this.checkWinCondition().res) {
-			this.stop();
+			await this.stop();
 		} else {
 			await this.processNight(roundId + 1);
 		}
 	}
 
-	start() {
+	async start() {
+		if (this.started) {
+			await this.sendGroup('游戏已经开始');
+			return;
+		}
 		if (!this.getTemplate()) {
-			this.chat('没有合法的板子，无法开始游戏');
+			await this.sendGroup('没有合法的板子，无法开始游戏');
 			return;
 		}
 
@@ -305,92 +311,90 @@ class Game {
 			const player = this.playerList[i];
 			const role = roleList[i];
 
-			player.setPlace(i + 1);
-			this.setRole(player, role);
+			player.setPlace(parseInt(i) + 1);
+			await this.setRole(player, role);
 		}
 
 		this.started = true;
-		this.processNight(1);
+		await this.processNight(1);
 	}
 
-	stop(result = null) {
+	async stop(result = null) {
+		if (!this.started) {
+			await this.sendGroup('游戏尚未开始');
+			return;
+		}
 		if (!result) {
 			result = this.checkWinCondition();
 		}
 
-		let message = [];
-		message.push(`游戏结束！\n因为 ${result.message}，${result.winner}获得胜利\n存活玩家：\n`);
+		let message = '游戏结束！\n' +
+			`因为 ${result.message}，${result.winner}获得胜利\n` +
+			'存活玩家：\n';
 		for (let player of this.playerList) {
 			if (player.alive) {
-				message.push(['<', this.roles[player.role].getDisplayName(), '> ', player.nick, ' ', At(player.id), '\n']);
+				message += `<${this.roles[player.role].getDisplayName()}> ${player.displayName} [CQ:at,qq=${player.id}]\n`;
 			}
 		}
-		message.push('死亡玩家：\n');
+		message += '死亡玩家：\n';
 		for (let player of this.playerList) {
 			if (!player.alive) {
-				message.push(['<', this.roles[player.role].getDisplayName(), '> ', player.nick, ' ', At(player.id), '\n']);
+				message += `<${this.roles[player.role].getDisplayName()}> ${player.displayName} [CQ:at,qq=${player.id}]\n`;
 			}
 		}
-		message.push('感谢你的游玩');
-		this.chat(utils.getFormattedMessageChain(message));
+		message += '感谢你的游玩';
 
 		this.started = false;
 		this.playerList = [];
+		await this.sendGroup(message);
 	}
 
-	register(id) {
+	async register(id) {
 		console.log('[GAME]', 'Register', id);
 
 		if (this.started) {
-			this.chat([At(id), Plain(' 游戏已经开始了，无法注册')], id);
+			await this.sendGroup(`[CQ:at,qq=${id}] 游戏已经开始了，无法注册`);
 			return;
 		}
 
-		let registered = false;
-		for (let registeredPlayer of this.playerList) {
-			if (registeredPlayer.id == id) {
-				registered = true;
-				break;
-			}
+		if (this.getPlayer(id)) {
+			await this.sendGroup(`[CQ:at,qq=${id}] 注册失败，你已经成功报名`);
+			return;
 		}
 
-		if (!registered) {
-			this.addPlayer(new Player(id));
-			const currentPlayer = this.getPlayer(id);
-			this.chat([At(currentPlayer.id), Plain(` 玩家 ${currentPlayer.getNick()} 注册成功！`)]);
-			this.logger.listAllPlayers();
-			currentPlayer.chat('hello！我是狼人杀 bot (*^▽^*)\n游玩前建议阅读说明书：https://github.com/memset0/QQbot-The-Werewolves-of-Millers-Hollow，别忘了给个 star 哦');
-		} else {
-			this.chat([At(id), Plain(' 注册失败，你已经成功报名。')]);
-		}
+		this.addPlayer(new Player(id));
+		const currentPlayer = this.getPlayer(id);
+		await this.sendGroup(`[CQ:at,qq=${currentPlayer.id}] 玩家 ${currentPlayer.getNick()} 注册成功！`);
+		await this.logger.listAllPlayers();
+		await currentPlayer.send('hello！我是狼人杀 bot (*^▽^*)\n游玩前建议阅读说明书：https://github.com/memset0/QQbot-The-Werewolves-of-Millers-Hollow，别忘了给个 star 哦');
 	}
 
-	registerCancel(id) {
-		this.log('Register Cancel', id);
+	async unregister(id) {
+		this.log('Unregister', id);
 
 		if (this.started) {
-			this.chat([At(id), Plain(' 游戏已经开始了，无法取消注册')], id);
+			await this.sendGroup(`[CQ:at,qq=${id}] 游戏已经开始了，无法取消注册`);
 			return;
 		}
 
-		let registered = false;
-		for (let registeredPlayer of this.playerList) {
-			if (registeredPlayer.id == id) {
-				registered = true;
-				break;
-			}
+		if (!this.getPlayer(id)) {
+			await this.sendGroup(`[CQ:at,qq=${id}] 取消注册失败，你尚未成功报名`);
+			return;
 		}
 
-		if (registered) {
-			this.removePlayer(this.getPlayer(id));
-			this.chat([At(id), Plain(' 成功取消注册')]);
-			this.logger.listAllPlayers();
-		} else {
-			this.chat([At(id), Plain(' 取消注册失败，你尚未注册成功。')]);
-		}
+		this.removePlayer(this.getPlayer(id));
+		await this.sendGroup(`[CQ:at,qq=${id}] 成功取消注册`);
+		await this.logger.listAllPlayers();
 	}
 
-	constructor(bot) {
+	async status() {
+		this.log('Status');
+
+		await this.logger.listAllPlayers();
+	}
+
+	constructor(app, bot) {
+		this.app = app;
 		this.bot = bot;
 		this.started = false;
 		this.playerList = [];
@@ -404,46 +408,43 @@ class Game {
 		this.voter = new Voter(this);
 
 		this.logger = {
-			listAllPlayers: () => {
-				let message = [];
+			listAllPlayers: async () => {
+				let message = '';
 				if (this.playerList.length) {
-					message.push(`已经注册的玩家有 ${this.playerList.length} 个：\n`);
+					message += `已经注册的玩家有 ${this.playerList.length} 个：\n`;
 					for (let i in this.playerList) {
 						const player = this.playerList[i];
-						message.push([`${i + 1}. ${player.nick}(`, At(player.id), ')']);
+						message += `[${parseInt(i) + 1}]${player.displayName} [CQ:at,qq=${player.id}]`;
 						if (this.started) {
-							message.push(` [${player.alive ? '存活' : '出局'}]`);
+							message += ` [${player.alive ? '存活' : '出局'}]`;
 						}
-						message.push('\n');
+						message += '\n';
 					}
 				} else {
-					message.push('当前没有玩家注册');
+					message += '当前没有玩家注册';
 				}
-				this.chat(utils.getFormattedMessageChain(message));
+				return await this.sendGroup(message);
 			},
 
-			listVotes: (voteResult, countResult) => {
-				let message = [];
-				message.push('本轮票型为');
+			listVotes: async (voteResult, countResult) => {
+				let message = '';
+				message += '本轮票型为';
 				for (let player of this.playerList) {
 					const targetPlayer = voteResult[player.id];
-					message.push([player.nick, ' → ', targetPlayer.nick]);
-					message.push('\n');
+					message += `${player.displayName} → ${targetPlayer.displayName}\n`;
 				}
-
-				message.push('\n本轮票数统计');
+				message += '\n本轮票数统计';
 				for (let playerId in countResult) {
 					const player = this.getPlayer(playerId);
-					message.push([player.nick, ` 获得 ${countResult[playerId].length} 票，来自：`]);
+					message += `${player.displayName} 获得 ${countResult[playerId].length} 票，来自：`
 					for (let index in countResult[playerId]) {
-						message.push(countResult[playerId][index].nick);
+						message += countResult[playerId][index].displayName;
 						if (index + 1 !== countResult[playerId].length) {
-							message.push('，');
+							message += '，';
 						}
 					}
 				}
-
-				this.chat(utils.getFormattedMessageChain(message));
+				return await this.sendGroup(message);
 			},
 		}
 	}

@@ -1,11 +1,14 @@
 {
   "name": "werewolf-bot",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "让你在群里玩狼人杀的 QQ bot。",
   "main": "src/main.js",
   "dependencies": {
+    "koishi": "^2.5.0",
+    "koishi-adapter-cqhttp": "^1.0.8",
+    "koishi-plugin-common": "^3.0.3",
+    "koishi-utils": "^3.2.1",
     "lodash": "^4.17.20",
-    "node-mirai-sdk": "^0.2.3",
     "shuffle-array": "^1.0.1",
     "sleep-promise": "^9.1.0",
     "yaml": "^1.10.0"

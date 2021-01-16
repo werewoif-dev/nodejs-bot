@@ -1,6 +1,3 @@
-const Mirai = require('node-mirai-sdk');
-const { Plain } = Mirai.MessageComponent;
-
 const Role = require('../role');
 const utils = require('../../utils.js');
 
@@ -9,33 +6,29 @@ class Werewolf extends Role {
 		console.log('[ROLE]', 'Werewolf', ...arguments);
 	}
 
-	getDisplayName() {
-		return [Plain('狼人')];
-	}
-
 	teamChat(player, message) {
 		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			player.chat('teamChat 命令不合法');
+			player.send('teamChat 命令不合法');
 			return;
 		}
 
-		this.log('Team Chat', player.nick, message);
+		this.log('Team Chat', player.displayName, message);
 		for (let currentPlayer of this.playerList) {
 			if (player.id != currentPlayer.id) {
-				currentPlayer.chat(utils.getFormattedMessageChain(`(message from ${player.nick}) `, message));
+				currentPlayer.send(`(${player.displayName}) ${utils.encodeMessage(message)}`);
 			}
 		}
 	}
 
 	kill(killer, targetPlayer) {
 		if (!killer || !killer.alive || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			killer.chat('kill 命令不合法');
+			killer.send('kill 命令不合法');
 			return;
 		}
 
-		this.log('Kill', targetPlayer.nick, 'by', killer.nick);
+		this.log('Kill', targetPlayer.displayName, 'by', killer.displayName);
 		for (let currentPlayer of this.playerList) {
-			currentPlayer.chat(utils.getFormattedMessageChain(`${killer.nick} 决定杀害 ${targetPlayer.nick}`));
+			currentPlayer.send(`${killer.displayName} 决定杀害 ${targetPlayer.displayName}`);
 		}
 
 		this.nightResolver(targetPlayer);
@@ -48,13 +41,13 @@ class Werewolf extends Role {
 
 	pass(player) {
 		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			player.chat('pass 命令不合法');
+			player.send('pass 命令不合法');
 			return;
 		}
 
-		this.log('Pass', 'by', player.nick);
+		this.log('Pass', 'by', player.displayName);
 		for (let currentPlayer of this.playerList) {
-			currentPlayer.chat(utils.getFormattedMessageChain(`${player.nick} 决定跳过本回合`));
+			currentPlayer.send(`${player.displayName} 决定跳过本回合`);
 		}
 
 		this.nightResolver(null);
@@ -69,18 +62,20 @@ class Werewolf extends Role {
 		this.roundId = roundId;
 		this.roundType = 'night';
 
-		this.game.chat('狼人正在决策中...');
+		this.sendGroup('狼人正在决策中...');
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
 			this.nightRejecter = reject;
 
-			this.chat(`现在是第 ${roundId} 个晚上！请狼人决定今晚要杀的人`);
+			this.send(`现在是第 ${roundId} 个晚上！请狼人决定今晚要杀的人`);
 		});
 	}
 
 	constructor(game) {
 		super(game);
+
+		this.name = '狼人';
 
 		this.helpMessage = [
 			'# <message> 或 chat <message>：可以进行队内交流',

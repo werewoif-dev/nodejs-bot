@@ -1,6 +1,3 @@
-const Mirai = require('node-mirai-sdk');
-const { Plain, At } = Mirai.MessageComponent;
-
 const Role = require('../role');
 
 class Witch extends Role {
@@ -8,67 +5,63 @@ class Witch extends Role {
 		console.log('[ROLE]', 'Witch', ...arguments);
 	}
 
-	getDisplayName() {
-		return [Plain('女巫')];
-	}
-
 	poison(targetPlayer) {
 		if (!this.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			this.chat('posion 命令不合法');
+			this.send('posion 命令不合法');
 			return;
 		}
 
-		this.log('Poison', targetPlayer.nick);
+		this.log('Poison', targetPlayer.displayName);
 
 		if (this.poisoned) {
-			this.chat('你已经使用过毒药了');
+			this.send('你已经使用过毒药了');
 			return;
 		}
 
 		if (this.poisonedPlayer) {
-			this.chat('你已经决定了要毒的人');
+			this.send('你已经决定了要毒的人');
 			return;
 		}
 
-		this.chat(`你用毒药杀了 ${targetPlayer.nick}`);
+		this.send(`你用毒药杀了 ${targetPlayer.displayName}`);
 		this.poisonedPlayer = targetPlayer;
 	}
 
 	save(targetPlayer) {
 		if (!this.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			this.chat('save 命令不合法');
+			this.send('save 命令不合法');
 			return;
 		}
 
-		this.log('Save', targetPlayer.nick);
+		this.log('Save', targetPlayer.displayName);
 
 		if (this.saved) {
-			this.chat('你已经使用过解药了');
+			this.send('你已经使用过解药了');
 			return;
 		}
 
 		if (this.savedPlayer) {
-			this.chat('你已经决定了要救的人');
+			this.send('你已经决定了要救的人');
 			return;
 		}
 
 		if (targetPlayer.id !== this.killedPlayer.id) {
-			this.chat('你只能对今晚死亡的人使用解药');
+			this.send('你只能对今晚死亡的人使用解药');
 			return;
 		}
 
-		this.chat(`你用解药救了 ${targetPlayer.nick}`);
+		this.send(`你用解药救了 ${targetPlayer.displayName}`);
 		this.savedPlayer = targetPlayer;
 	}
 
 	pass() {
 		if (!this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			this.chat('pass 命令不合法');
+			this.send('pass 命令不合法');
 			return;
 		}
 
 		this.log('Pass');
-		this.chat('你结束了你的回合');
+		this.send('你结束了你的回合');
 
 		if (this.poisonedPlayer) {
 			this.poisoned = true;
@@ -95,7 +88,7 @@ class Witch extends Role {
 		this.poisonedPlayer = null;
 		this.killedPlayer = killedPlayer;
 
-		this.game.chat('女巫正在决策中...');
+		this.sendGroup('女巫正在决策中...');
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
@@ -110,18 +103,20 @@ class Witch extends Role {
 
 			if (!this.poisoned) {
 				if (killedPlayer) {
-					this.chat(`现在是第 ${roundId} 个晚上！今天晚上 ${killedPlayer.nick} 死了`);
+					this.send(`现在是第 ${roundId} 个晚上！今天晚上 ${killedPlayer.displayName} 死了`);
 				} else {
-					this.chat(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
+					this.send(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
 				}
 			} else {
-				this.chat(`现在是第 ${roundId} 个晚上`);
+				this.send(`现在是第 ${roundId} 个晚上`);
 			}
 		});
 	}
 
 	constructor(game) {
 		super(game);
+
+		this.name = '女巫';
 
 		this.saved = false;
 		this.poisoned = false;

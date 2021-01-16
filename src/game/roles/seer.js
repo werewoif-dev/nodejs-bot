@@ -1,6 +1,3 @@
-const Mirai = require('node-mirai-sdk');
-const { Plain, At } = Mirai.MessageComponent;
-
 const Role = require('../role');
 
 class Seer extends Role {
@@ -8,28 +5,24 @@ class Seer extends Role {
 		console.log('[ROLE]', 'Seer', ...arguments);
 	}
 
-	getDisplayName() {
-		return [Plain('预言家')];
-	}
-
 	chat(message) {
 		for (let currentPlayer of this.playerList) {
-			currentPlayer.chat(message);
+			currentPlayer.send(message);
 		}
 	}
 
 	suspect(targetPlayer) {
 		if (!this.isAlive() || !targetPlayer || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			this.chat('suspect 命令不合法');
+			this.send('suspect 命令不合法');
 			return;
 		}
 
-		this.log('Suspect', targetPlayer.nick);
+		this.log('Suspect', targetPlayer.displayName);
 
 		if (targetPlayer.role === 'werewolf') {
-			this.chat(`${targetPlayer.nick} 是坏人`);
+			this.send(`${targetPlayer.displayName} 是坏人`);
 		} else {
-			this.chat(`${targetPlayer.nick} 是好人`);
+			this.send(`${targetPlayer.displayName} 是好人`);
 		}
 
 		this.nightResolver();
@@ -42,12 +35,12 @@ class Seer extends Role {
 
 	pass() {
 		if (!this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			this.chat('pass 命令不合法');
+			this.send('pass 命令不合法');
 			return;
 		}
 
 		this.log('Pass');
-		this.chat('你结束了你的回合');
+		this.send('你结束了你的回合');
 
 		this.nightResolver();
 
@@ -61,7 +54,7 @@ class Seer extends Role {
 		this.roundId = roundId;
 		this.roundType = 'night';
 		
-		this.game.chat('预言家正在决策中...');
+		this.sendGroup('预言家正在决策中...');
 
 		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
@@ -71,12 +64,14 @@ class Seer extends Role {
 				resolve();
 			}
 
-			this.chat(`现在是第 ${roundId} 个晚上`);
+			this.send(`现在是第 ${roundId} 个晚上`);
 		});
 	}
 
 	constructor(game) {
 		super(game);
+
+		this.name = '预言家';
 
 		this.helpMessage =[
 			'suspect <player>：查验 <player> 是好人还是坏人',

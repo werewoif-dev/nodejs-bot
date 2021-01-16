@@ -28,27 +28,27 @@ class Voter {
 
 	vote(player, targetPlayer) {
 		if (!this.resolver || !this.rejecter) {
-			player.chat('投票未开始');
+			player.send('投票未开始');
 			return;
 		}
 		if (!player.alive) {
-			player.chat('你已出局，没有投票权限');
+			player.send('你已出局，没有投票权限');
 			return;
 		}
 		if (!targetPlayer || !targetPlayer.alive) {
-			player.chat('投票不合法');
+			player.send('投票不合法');
 			return;
 		}
 
 		if (Object.keys(this.result).includes(String(player.id))) {
-			player.chat('你已经投票 / 弃权过了');
+			player.send('你已经投票 / 弃权过了');
 			return;
 		}
 
-		this.log('Vote', player.nick, 'To', targetPlayer.nick);
+		this.log('Vote', player.displayName, 'To', targetPlayer.displayName);
 
 		this.result[String(player.id)] = targetPlayer;
-		player.chat(`你投票给了 ${targetPlayer.nick}`);
+		player.send(`你投票给了 ${targetPlayer.displayName}`);
 		if (this.isEnd()) {
 			this.end();
 		}
@@ -56,23 +56,23 @@ class Voter {
 
 	pass(player) {
 		if (!this.resolver || !this.rejecter) {
-			player.chat('投票未开始');
+			player.send('投票未开始');
 			return;
 		}
 		if (!player.alive) {
-			player.chat('你没有投票权限');
+			player.send('你没有投票权限');
 			return;
 		}
 
 		if (Object.keys(this.result).includes(String(player.id))) {
-			player.chat('你已经投票 / 弃权过了');
+			player.send('你已经投票 / 弃权过了');
 			return;
 		}
 
-		this.log('Pass', player.nick);
+		this.log('Pass', player.displayName);
 
 		this.result[String(player.id)] = null;
-		player.chat('你放弃了你的投票权');
+		player.send('你放弃了你的投票权');
 		if (this.isEnd()) {
 			this.end();
 		}

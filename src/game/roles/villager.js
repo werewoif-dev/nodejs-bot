@@ -1,6 +1,3 @@
-const Mirai = require('node-mirai-sdk');
-const { Plain, At } = Mirai.MessageComponent;
-
 const Role = require('../role');
 
 class Villager extends Role {
@@ -8,12 +5,9 @@ class Villager extends Role {
 		console.log('[ROLE]', 'Villager', ...arguments);
 	}
 
-	getDisplayName() {
-		return [Plain('村民')];
-	}
-
 	constructor(game) {
 		super(game);
+		this.name = '村民';
 	}
 }
 
