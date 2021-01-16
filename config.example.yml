@@ -1,0 +1,20 @@
+qq:
+group:
+master:
+server:
+  type: # 选填 http 或 ws
+  http:
+    port:
+    secret:
+    token:
+  ws:
+    token:
+    server:
+retry:
+  max: 0
+role:
+  winCondition: all
+templates:
+  - [werewolf, werewolf, villager, villager, witch, seer]
+nicks:
+  2601960221: memset0
