@@ -300,6 +300,14 @@ class Game {
 			await this.setRole(player, role);
 		}
 
+		for (let roleName in this.roles) {
+			const roleClass = this.roles[roleName];
+			await roleClass.onGameStart();
+			for (let player of roleClass.playerList) {
+				roleClass.help(player);
+			}
+		}
+
 		this.started = true;
 		await this.processNight(1);
 	}
@@ -404,11 +412,11 @@ class Game {
 					message += `已经注册的玩家有 ${this.playerList.length} 个：\n`;
 					for (let i in this.playerList) {
 						const player = this.playerList[i];
-						message += `[${parseInt(i) + 1}]${player.displayName} [CQ:at,qq=${player.id}]`;
 						if (this.started) {
-							message += ` [${player.alive ? '存活' : '出局'}]`;
+							message += `${player.displayName} (${player.alive ? '存活' : '出局'})\n`;
+						} else {
+							message += `[${i + 1}]${player.nick}\n`;
 						}
-						message += '\n';
 					}
 				} else {
 					message += '当前没有玩家注册';

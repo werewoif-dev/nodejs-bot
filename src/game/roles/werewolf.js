@@ -7,6 +7,18 @@ class Werewolf extends Role {
 		console.log('[ROLE]', 'Werewolf', ...arguments);
 	}
 
+	async onGameStart() {
+		if (!this.isActive()) {
+			return;
+		}
+
+		let message = '本局游戏中的狼有：';
+		for (let player of this.playerList) {
+			message += '\n' + player.displayName;
+		}
+		await this.send(message);
+	}
+
 	teamChat(player, message) {
 		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			player.send('teamChat 命令不合法');

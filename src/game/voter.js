@@ -1,22 +1,25 @@
 class Voter {
 
 	log() {
-		console.log('[LOG]', ...arguments);
+		console.log('[VOTE]', ...arguments);
 	}
 
-	isEnd() {
-		let resultNumber = Object.keys(this.result).length;
+	countResult() {
+		return Object.keys(this.result).length
+	}
+
+	countAlivePlayer() {
 		let alivePlayerNumber = 0;
 		for (let player of this.game.playerList) {
 			if (player.alive) {
 				alivePlayerNumber += 1;
 			}
 		}
+		return alivePlayerNumber;
+	}
 
-		this.log('result', this.result);
-		this.log(resultNumber, '/', alivePlayerNumber);
-
-		if (alivePlayerNumber === resultNumber) {
+	isEnd() {
+		if (this.countAlivePlayer() === this.countResult()) {
 			return true;
 		} else {
 			return false;
@@ -46,6 +49,9 @@ class Voter {
 
 		this.result[String(player.id)] = targetPlayer;
 		player.send(`你投票给了 ${targetPlayer.displayName}`);
+
+		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countAlivePlayer()}`);
+
 		if (this.isEnd()) {
 			this.end();
 		}
@@ -88,7 +94,7 @@ class Voter {
 		});
 	}
 
-	end() {
+	async end() {
 		let voteCounter = {};
 		let countResult = [];
 		for (let playerId in this.result) {
@@ -117,9 +123,9 @@ class Voter {
 				response = null;
 			}
 		}
-		this.log(response, maxVoteNumber);
+		this.log('Result', response ? response.displayName : response, maxVoteNumber);
 
-		this.game.logger.listVotes(this.result, countResult);
+		await this.game.logger.listVotes(this.result, countResult);
 
 		this.started = false;
 		this.resolver(response);

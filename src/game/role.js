@@ -118,6 +118,9 @@ class Role {
 		this.timeLimitKey = null;
 	}
 
+	async onGameStart() { }
+	async onGameStop() { }
+
 	constructor(game) {
 		this.game = game;
 		this.sendGroup = (message) => this.game.sendGroup(message);
