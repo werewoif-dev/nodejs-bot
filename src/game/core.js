@@ -222,24 +222,16 @@ class Game {
 		this.roundType = 'night';
 		await this.sendGroup(`第 ${roundId} 个晚上开始了`);
 
-		// werewolfs' round
-		const killedPlayer = await this.roles.werewolf.processNight(roundId);
-		await sleep(500);
-
-		// the witch's round
-		const { poisonedPlayer, savedPlayer } = await this.roles.witch.processNight(roundId, killedPlayer);
-		await sleep(500);
-
-		// the seer's round
+		await this.roles.werewolf.processNight(roundId);
+		await this.roles.witch.processNight(roundId);
 		await this.roles.seer.processNight(roundId);
-		await sleep(500);
 
 		const diedPlayerList = [];
-		if (killedPlayer && (!savedPlayer || savedPlayer.id !== killedPlayer.id)) {
-			diedPlayerList.push(killedPlayer);
+		if (this.roles.werewolf.killedPlayer && (!this.roles.witch.savedPlayer || this.roles.witch.savedPlayer.id !== this.roles.werewolf.killedPlayer.id)) {
+			diedPlayerList.push(this.roles.werewolf.killedPlayer);
 		}
-		if (poisonedPlayer) {
-			diedPlayerList.push(poisonedPlayer);
+		if (this.roles.witch.poisonedPlayer) {
+			diedPlayerList.push(this.roles.witch.poisonedPlayer);
 		}
 		for (let currentPlayer of diedPlayerList) {
 			currentPlayer.alive = false;
@@ -253,6 +245,9 @@ class Game {
 			message += `今天晚上 [CQ:at,qq=${diedPlayerList[0].id}] 死了`;
 		} else if (diedPlayerList.length === 2) {
 			message += `今天晚上 [CQ:at,qq=${diedPlayerList[0].id}] 和 [CQ:at,qq=${diedPlayerList[1].id}] 死了`;
+		}
+		if (roundId === 1) {
+			message += '，请留遗言';
 		}
 		await this.sendGroup(message);
 

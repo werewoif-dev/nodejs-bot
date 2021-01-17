@@ -14,6 +14,11 @@ retry:
   max: 0
 role:
   winCondition: all
+timeLimit:
+  night:
+    werewolf: 300
+    seer: 60
+    witch: 60
 templates:
   - [werewolf, werewolf, villager, villager, witch, seer]
 nicks:

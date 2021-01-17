@@ -21,7 +21,7 @@ class Werewolf extends Role {
 	}
 
 	kill(killer, targetPlayer) {
-		if (!killer || !killer.alive || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!killer || !killer.alive || !targetPlayer || !targetPlayer.alive || !this.nightResolver) {
 			killer.send('kill 命令不合法');
 			return;
 		}
@@ -31,16 +31,13 @@ class Werewolf extends Role {
 			currentPlayer.send(`${killer.displayName} 决定杀害 ${targetPlayer.displayName}`);
 		}
 
-		this.nightResolver(targetPlayer);
-
-		this.roundId = null;
-		this.roundType = null;
-		this.nightResolver = undefined;
-		this.nightRejecter = undefined;
+		this.killedPlayer = targetPlayer;
+		this.nightResolver();
+		this.endNight();
 	}
 
 	pass(player) {
-		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!player || !player.alive || !this.nightResolver) {
 			player.send('pass 命令不合法');
 			return;
 		}
@@ -50,24 +47,27 @@ class Werewolf extends Role {
 			currentPlayer.send(`${player.displayName} 决定跳过本回合`);
 		}
 
-		this.nightResolver(null);
-
-		this.roundId = null;
-		this.roundType = null;
-		this.nightResolver = undefined;
-		this.nightRejecter = undefined;
+		this.nightResolver();
+		this.endNight();
 	}
 
 	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
+		this.killedPlayer = null;
 
-		this.sendGroup('狼人正在决策中...');
+		return new Promise((resolve) => {
+			if (!this.isActive()) {
+				resolve();
+				return;
+			}
 
-		return new Promise((resolve, reject) => {
 			this.nightResolver = resolve;
-			this.nightRejecter = reject;
+			if (config.timeLimit && config.timeLimit.night && config.timeLimit.night.werewolf) {
+				this.setTimeLimit(config.timeLimit.night.werewolf, this.nightResolver);
+			}
 
+			this.sendGroup('狼人正在决策中...');
 			this.send(`现在是第 ${roundId} 个晚上！请狼人决定今晚要杀的人`);
 		});
 	}
