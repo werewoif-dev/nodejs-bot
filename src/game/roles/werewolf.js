@@ -34,7 +34,7 @@ class Werewolf extends Role {
 
 		this.killedPlayer = targetPlayer;
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	pass(player) {
@@ -49,7 +49,7 @@ class Werewolf extends Role {
 		}
 
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	processNight(roundId) {
@@ -65,9 +65,7 @@ class Werewolf extends Role {
 			}
 
 			this.nightResolver = resolve;
-			if (config.timeLimit && config.timeLimit.night && config.timeLimit.night.werewolf) {
-				this.setTimeLimit(config.timeLimit.night.werewolf, this.nightResolver);
-			}
+			this.setTimeLimit(config.query('timeLimit.skill.night.werewolf'), this.nightResolver);
 
 			this.sendGroup('狼人正在决策中...');
 			this.send(`现在是第 ${roundId} 个晚上！请狼人决定今晚要杀的人`);

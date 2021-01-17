@@ -23,7 +23,7 @@ class Seer extends Role {
 		this.suspectedPlayer = targetPlayer;
 
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	pass() {
@@ -36,7 +36,7 @@ class Seer extends Role {
 		this.send('你结束了你的回合');
 
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	processNight(roundId) {
@@ -52,9 +52,7 @@ class Seer extends Role {
 			}
 
 			this.nightResolver = resolve;
-			if (config.timeLimit && config.timeLimit.night && config.timeLimit.night.seer) {
-				this.setTimeLimit(config.timeLimit.night.seer, this.nightResolver);
-			}
+			this.setTimeLimit(config.query('timeLimit.skill.night.seer'), this.nightResolver);
 
 			this.sendGroup('预言家正在决策中...');
 			this.send(`现在是第 ${roundId} 个晚上`);

@@ -84,14 +84,19 @@ class Game {
 		await player.send(`游戏开始！你的角色是 ${this.roles[role].getDisplayName()}`);
 	}
 
+
 	getTemplate() {
 		const playerNumber = this.playerList.length;
-		for (let template of config.templates) {
+		for (let template of this.templateList) {
 			if (template.length === playerNumber) {
 				return template;
 			}
 		}
 		return null;
+	}
+
+	setTemplate(template) {
+		this.templateList = [template];
 	}
 
 
@@ -312,7 +317,7 @@ class Game {
 		}
 
 		let message = '游戏结束！\n' +
-			`因为 ${result.message}，${result.winner}获得胜利\n` +
+			`因为 ${result.message}，${result.winner} 获得胜利\n` +
 			'存活玩家：\n';
 		for (let player of this.playerList) {
 			if (player.alive) {
@@ -381,6 +386,8 @@ class Game {
 		this.bot = bot;
 		this.started = false;
 		this.playerList = [];
+
+		this.templateList = config.templates;
 
 		this.roles = {
 			werewolf: new Werewolf(this),

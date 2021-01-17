@@ -9,6 +9,7 @@ app.plugin(require('../../src/game/index'));
 
 try {
 	(async () => {
+		const interval = 50;
 		const { p, g } = utils.generateSession(app, config.group, [
 			1000000001,
 			1000000002,
@@ -18,34 +19,94 @@ try {
 			1000000006,
 		]);
 
-		// 狼人女巫板子 [werewolf, witch]
-		await utils.receiveByInterval(200, [
-			[g[0], 'register'],
-			[g[1], 'register'],
-			[g[0], 'start game'],
-			[p[0], 'kill 1'],
-			[p[1], 'pass'],
-		]);
-		await utils.receiveByInterval(200, [
-			[g[0], 'register'],
-			[g[1], 'register'],
-			[g[0], 'start game'],
-			[p[0], 'kill 1'],
-			[p[1], 'save 1'],
-		]);
-
-		// 狼预女板子 [werewolf, villager, seer, witch]
-		await utils.receiveByInterval(200, [
+		// 狼
+		global.game.setTemplate(['werewolf', 'villager', 'villager', 'villager']);
+		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
 			[g[2], 'register'],
 			[g[3], 'register'],
 			[g[0], 'start game'],
 			[p[0], 'kill 1'],
-			[p[3], 'save 1'],
-			[p[2], 'suspect 1'],
+			[g[0], 'stop game']
+		]);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[0], 'start game'],
+			[p[0], 'kill null'],
+			[p[0], 'kill 2'],
+			[g[0], 'stop game']
+		]);
+		global.game.setTemplate(['werewolf', 'werewolf', 'werewolf', 'villager']);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[0], 'start game'],
+			[p[0], '# hello'],
+			[p[1], '# hi'],
+			[p[2], '# how are you'],
+			[p[0], 'kill 4'],
+		]);
+
+		// 女巫
+		global.game.setTemplate(['werewolf', 'witch', 'villager', 'villager', 'villager']);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[4], 'register'],
+			[g[0], 'start game'],
+			[p[0], 'kill 2'],
+			[p[1], 'save 2'],
 			[g[0], 'stop game'],
 		]);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[4], 'register'],
+			[g[0], 'start game'],
+			[p[0], 'kill 2'],
+			[p[1], 'poison 3'],
+			[g[0], 'stop game'],
+		]);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[4], 'register'],
+			[g[0], 'start game'],
+			[p[0], 'kill 2'],
+			[p[1], 'pass'],
+			[g[0], 'stop game'],
+		]);
+
+		// 预言家
+		global.game.setTemplate(['seer', 'werewolf', 'witch', 'villager']);
+		{
+			let target = [true, false, true, true];
+			for (let i = 1; i <= target.length; i++) {
+				await utils.receiveByInterval(interval, [
+					[g[0], 'register'],
+					[g[1], 'register'],
+					[g[2], 'register'],
+					[g[3], 'register'],
+					[g[0], 'start game'],
+					[p[1], 'pass'],
+					[p[2], 'pass'],
+					[p[0], `suspect ${i}`],
+					[g[0], 'stop game'],
+				]);
+			}
+		}
 
 	})();
 } catch (err) {

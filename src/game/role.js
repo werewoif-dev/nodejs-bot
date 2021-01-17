@@ -106,7 +106,7 @@ class Role {
 		}
 	}
 
-	endNight() {
+	endTurn() {
 		this.roundId = null;
 		this.roundType = null;
 

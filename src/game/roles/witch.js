@@ -22,7 +22,7 @@ class Witch extends Role {
 		this.poisonedPlayer = targetPlayer;
 
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	save(targetPlayer) {
@@ -41,7 +41,7 @@ class Witch extends Role {
 			return;
 		}
 
-		if (targetPlayer.id === this.playerList[0].id && !(this.roles.saveHerself || (this.roles.saveHerselfAtFirstNight && this.roundId === 1))) {
+		if (targetPlayer.id === this.playerList[0].id && !(this.rules.saveHerself || (this.rules.saveHerselfAtFirstNight && this.roundId === 1))) {
 			this.send('你不能对自己使用解药');
 			return;
 		}
@@ -51,7 +51,7 @@ class Witch extends Role {
 		this.savedPlayer = targetPlayer;
 
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	pass() {
@@ -64,7 +64,7 @@ class Witch extends Role {
 		this.send('你结束了你的操作回合');
 
 		this.nightResolver();
-		this.endNight();
+		this.endTurn();
 	}
 
 	processNight(roundId) {
@@ -81,7 +81,7 @@ class Witch extends Role {
 			}
 
 			this.nightResolver = resolve;
-			this.setTimeLimit(config.query('timeLimit.night.witch'), this.nightResolver);
+			this.setTimeLimit(config.query('timeLimit.skill.night.witch'), this.nightResolver);
 
 			this.sendGroup('女巫正在决策中...');
 			if (!this.saved) {
