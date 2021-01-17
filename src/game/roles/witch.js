@@ -1,4 +1,5 @@
 const Role = require('../role');
+const config = require('../../../config');
 
 class Witch extends Role {
 	log() {
@@ -35,7 +36,7 @@ class Witch extends Role {
 			return;
 		}
 
-		if (targetPlayer.id !== this.killedPlayer.id) {
+		if (targetPlayer.id !== this.game.roles.werewolf.killedPlayer.id) {
 			this.send('你只能对今晚死亡的人使用解药');
 			return;
 		}
@@ -84,8 +85,8 @@ class Witch extends Role {
 
 			this.sendGroup('女巫正在决策中...');
 			if (!this.saved) {
-				if (this.roles.werewolf.killedPlayer) {
-					this.send(`现在是第 ${roundId} 个晚上！今天晚上 ${killedPlayer.displayName} 死了`);
+				if (this.game.roles.werewolf.killedPlayer) {
+					this.send(`现在是第 ${roundId} 个晚上！今天晚上 ${this.game.roles.werewolf.killedPlayer.displayName} 死了`);
 				} else {
 					this.send(`现在是第 ${roundId} 个晚上！没有玩家被狼人杀害`);
 				}
@@ -103,11 +104,11 @@ class Witch extends Role {
 		this.saved = false;
 		this.poisoned = false;
 
-		this.roles = {
-			saveHerself: config.query('role.witch.saveHerself', false),
-			saveHerselfAtFirstNight: config.query('role.witch.saveHerselfAtFirstNight', false),
+		this.rules = {
+			saveHerself: config.query('rule.witch.saveHerself', false),
+			saveHerselfAtFirstNight: config.query('rule.witch.saveHerselfAtFirstNight', false),
 		};
-		this.log('(roles)', this.roles);
+		this.log('(rules)', this.rules);
 
 		this.helpMessage = [
 			'poison <player>：对 <player> 使用毒药',

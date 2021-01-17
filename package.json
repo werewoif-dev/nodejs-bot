@@ -7,6 +7,7 @@
     "koishi": "^2.5.0",
     "koishi-adapter-cqhttp": "^1.0.8",
     "koishi-plugin-common": "^3.0.3",
+    "koishi-test-utils": "^5.0.3",
     "koishi-utils": "^3.2.1",
     "lodash": "^4.17.20",
     "shuffle-array": "^1.0.1",
@@ -16,7 +17,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "node src/app.js",
-    "test": "node tests/main.js"
+    "test": "node tests/index.js"
   },
   "repository": {
     "type": "git",

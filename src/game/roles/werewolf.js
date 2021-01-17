@@ -1,5 +1,6 @@
 const Role = require('../role');
 const utils = require('../../utils.js');
+const config = require('../../../config');
 
 class Werewolf extends Role {
 	log() {
@@ -54,6 +55,7 @@ class Werewolf extends Role {
 	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
+
 		this.killedPlayer = null;
 
 		return new Promise((resolve) => {

@@ -1,6 +1,3 @@
-const Mirai = require('node-mirai-sdk');
-const { Plain, At } = Mirai.MessageComponent;
-
 class Voter {
 
 	log() {

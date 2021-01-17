@@ -12,7 +12,7 @@ server:
     server:
 retry:
   max: 0
-role:
+rule:
   winCondition: all
 timeLimit:
   night:

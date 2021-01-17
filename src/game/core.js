@@ -1,4 +1,3 @@
-const shuffle = require('shuffle-array');
 const sleep = require('sleep-promise');
 
 const utils = require('../utils');
@@ -97,11 +96,9 @@ class Game {
 
 
 	checkWinCondition() {
-		if (config.role.winCondition === 'all') {
+		if (config.rule.winCondition === 'all') {
 			let flag
 			let counter
-
-			// 如果所有好人都死了
 			flag = false;
 			for (let player of this.playerList) {
 				if (player.role !== 'werewolf' && player.alive) {
@@ -115,8 +112,6 @@ class Game {
 					message: '所有好人已经出局',
 				};
 			}
-
-			// 如果所有狼人都死了
 			flag = false;
 			for (let player of this.playerList) {
 				if (player.role === 'werewolf' && player.alive) {
@@ -130,8 +125,6 @@ class Game {
 					message: '所有狼人已经出局'
 				};
 			}
-
-			// 如果狼人的数量大于等于好人的数量
 			counter = 0;
 			for (let player of this.playerList) {
 				if (player.alive) {
@@ -150,11 +143,9 @@ class Game {
 				};
 			}
 
-		} else if (config.role.winCondition === 'part') {
+		} else if (config.rule.winCondition === 'part') {
 			let flag_1
 			let flag_2
-
-			// 如果这局有村民且所有村民都死了
 			flag_1 = false;
 			flag_2 = false;
 			for (let player of this.playerList) {
@@ -172,8 +163,6 @@ class Game {
 					message: '所有村民已经出局'
 				};
 			}
-
-			// 如果这局有神且所有神都死了
 			flag_1 = false;
 			flag_2 = false;
 			for (let player of this.playerList) {
@@ -191,8 +180,6 @@ class Game {
 					message: '所有神已经出局'
 				};
 			}
-
-			// 如果所有狼人都死了
 			flag_2 = false;
 			for (let player of this.playerList) {
 				if (player.role === 'werewolf' && player.alive) {
@@ -206,14 +193,12 @@ class Game {
 					message: '所有狼人已经出局'
 				};
 			}
+		}
 
-
-		} else {
-			return {
-				res: false,
-				winner: null,
-				error: '没有合法的获胜条件',
-			}
+		return {
+			res: false,
+			winner: null,
+			error: '没有合法的获胜条件',
 		}
 	}
 
@@ -236,7 +221,7 @@ class Game {
 		for (let currentPlayer of diedPlayerList) {
 			currentPlayer.alive = false;
 		}
-		shuffle(diedPlayerList);
+		utils.shuffle(diedPlayerList);
 
 		let message = `第 ${roundId} 个晚上结束了，`;
 		if (diedPlayerList.length === 0) {
@@ -246,7 +231,7 @@ class Game {
 		} else if (diedPlayerList.length === 2) {
 			message += `今天晚上 [CQ:at,qq=${diedPlayerList[0].id}] 和 [CQ:at,qq=${diedPlayerList[1].id}] 死了`;
 		}
-		if (roundId === 1) {
+		if (roundId === 1 && diedPlayerList.length !== 0) {
 			message += '，请留遗言';
 		}
 		await this.sendGroup(message);
@@ -300,7 +285,7 @@ class Game {
 		}
 
 		let roleList = this.getTemplate();
-		shuffle(roleList);
+		utils.shuffle(roleList);
 
 		for (let i in roleList) {
 			const player = this.playerList[i];
@@ -320,7 +305,10 @@ class Game {
 			return;
 		}
 		if (!result) {
-			result = this.checkWinCondition();
+			result = {
+				message: '游戏被手动结束',
+				winner: 'membot',
+			};
 		}
 
 		let message = '游戏结束！\n' +

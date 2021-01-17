@@ -1,6 +1,12 @@
+const shuffleArray = require('shuffle-array');
 const sleep = require('sleep-promise');
 
 const utils = {
+	shuffle(array) {
+		if (!app.test) {
+			shuffleArray(array);
+		}
+	},
 
 	decodeMessage(message) {
 		return message.replace(/&#91;/gm, '[').replace(/&#93;/gm, ']').replace(/&amp;/gm, '&');

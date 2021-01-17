@@ -76,7 +76,7 @@ class Role {
 		return this.displayName || this.name;
 	}
 
-	setTimeLimit(timeLimit, resolver) {
+	async setTimeLimit(timeLimit, resolver) {
 		if (!timeLimit || isNaN(parseInt(timeLimit))) {
 			return;
 		}
@@ -120,7 +120,6 @@ class Role {
 
 	constructor(game) {
 		this.game = game;
-		this.roles = this.game.roles;
 		this.sendGroup = (message) => this.game.sendGroup(message);
 
 		this.roundId = null;

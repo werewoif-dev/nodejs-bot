@@ -3,12 +3,19 @@ const config = require('../../config');
 const Game = require('./core');
 
 module.exports = async (app) => {
-	await new Promise((resolve) => { app.on('connect', resolve) });
+	if (!app.test) {
+		await new Promise((resolve) => { app.on('connect', resolve) });
+	}
 	let bot = app.bots.find(bot => bot);
 	let game = new Game(app, bot);
 	global.app = app;
 	global.bot = bot;
 	global.game = game;
+
+	if (app.test) {
+		bot.sendGroupMsg = (message) => { };
+		bot.sendPrivateMsg = (message) => { };
+	}
 
 	app.on('message', async (session) => {
 		const { message, messageType, sender } = session;
