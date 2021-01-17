@@ -74,7 +74,6 @@ module.exports = async (app) => {
 						}
 					} else if (player.role === 'witch') {
 						if (message.startsWith('poison ')) {
-							const targetPlayer = game.getPlayer(message.slice(7));
 							game.roles.witch.poison(targetPlayer);
 						} else if (message.startsWith('save ')) {
 							game.roles.witch.save(targetPlayer);
@@ -83,10 +82,15 @@ module.exports = async (app) => {
 						}
 					} else if (player.role === 'seer') {
 						if (message.startsWith('suspect ')) {
-							const targetPlayer = game.getPlayer(message.slice(8));
 							game.roles.seer.suspect(targetPlayer);
 						} else if (message === 'pass') {
 							game.roles.seer.pass();
+						}
+					} else if (player.role === 'hunter') {
+						if (message.startsWith('shoot ')) {
+							game.roles.hunter.shoot(targetPlayer);
+						} else if (message === 'pass') {
+							game.roles.hunter.pass();
 						}
 					}
 				}

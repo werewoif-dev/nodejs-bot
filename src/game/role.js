@@ -62,10 +62,7 @@ class Role {
 			return;
 		}
 
-		for (let message of this.helpMessage) {
-			await player.send(message);
-			await sleep(100);
-		}
+		await player.send(this.helpMessage.join('\n'));
 	}
 
 	getName() {

@@ -108,6 +108,30 @@ try {
 			}
 		}
 
+		// 猎人
+		global.game.setTemplate(['werewolf', 'hunter', 'villager', 'villager']);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[0], 'start game'],
+			[p[0], 'kill 2'],
+			[p[1], 'shoot 1'],
+		]);
+		await utils.receiveByInterval(interval, [
+			[g[0], 'register'],
+			[g[1], 'register'],
+			[g[2], 'register'],
+			[g[3], 'register'],
+			[g[0], 'start game'],
+			[p[0], 'pass'],
+			[p[0], 'vote 2'],
+			[p[1], 'vote 2'],
+			[p[2], 'vote 2'],
+			[p[3], 'vote 2'],
+			[p[1], 'shoot 1'],
+		]);
 	})();
 } catch (err) {
 	console.error(err);

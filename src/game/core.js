@@ -6,6 +6,7 @@ const config = require('../../config');
 const Player = require('./player');
 const Voter = require('./voter');
 const Seer = require('./roles/seer');
+const Hunter = require('./roles/hunter');
 const Witch = require('./roles/witch');
 const Villager = require('./roles/villager');
 const Werewolf = require('./roles/werewolf');
@@ -207,6 +208,18 @@ class Game {
 		}
 	}
 
+	async processKilled(player) {
+		if (player.role === 'hunter') {
+			if (!this.roles.witch.poisonedPlayer || player.id !== this.roles.witch.poisonedPlayer.id) {
+				await this.roles.hunter.processKilled();
+				if (this.roles.hunter.shotPlayer) {
+					this.roles.hunter.shotPlayer.alive = false;
+					await this.processKilled(this.roles.hunter.shotPlayer);
+				}
+			}
+		}
+	}
+
 	async processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
@@ -241,6 +254,11 @@ class Game {
 		}
 		await this.sendGroup(message);
 
+		for (let i = 0; i < diedPlayerList.length; i++) {
+			const currentPlayer = diedPlayerList[i];
+			await this.processKilled(currentPlayer);
+		}
+
 		if (this.checkWinCondition().res) {
 			await this.stop();
 		} else {
@@ -263,6 +281,7 @@ class Game {
 		if (voteResult) {
 			voteResult.alive = false;
 			await this.sendGroup(`投票结束，${voteResult.displayName} 出局了`);
+			await this.processKilled(voteResult);
 		} else {
 			await this.sendGroup('投票结束，没有人出局');
 		}
@@ -318,14 +337,18 @@ class Game {
 			return;
 		}
 		if (!result) {
-			result = {
-				message: '游戏被手动结束',
-				winner: 'membot',
-			};
+			result = this.checkWinCondition();
+			if (!result.res) {
+				result = {
+					...result,
+					message: '游戏被手动结束',
+					winner: 'bot ',
+				};
+			}
 		}
 
 		let message = '游戏结束！\n' +
-			`因为 ${result.message}，${result.winner} 获得胜利\n` +
+			`因为${result.message}，${result.winner}阵营获得胜利\n` +
 			'存活玩家：\n';
 		for (let player of this.playerList) {
 			if (player.alive) {
@@ -401,6 +424,7 @@ class Game {
 			werewolf: new Werewolf(this),
 			witch: new Witch(this),
 			seer: new Seer(this),
+			hunter: new Hunter(this),
 			villager: new Villager(this),
 		};
 		this.voter = new Voter(this);
@@ -415,7 +439,7 @@ class Game {
 						if (this.started) {
 							message += `${player.displayName} (${player.alive ? '存活' : '出局'})\n`;
 						} else {
-							message += `[${i + 1}]${player.nick}\n`;
+							message += `[${parseInt(i) + 1}]${player.nick}\n`;
 						}
 					}
 				} else {
@@ -426,15 +450,15 @@ class Game {
 
 			listVotes: async (voteResult, countResult) => {
 				let message = '';
-				message += '本轮票型为';
+				message += '本轮票型：';
 				for (let player of this.playerList) {
 					const targetPlayer = voteResult[player.id];
-					message += `${player.displayName} → ${targetPlayer.displayName}\n`;
+					message += `\n${player.displayName} → ${targetPlayer.displayName}`;
 				}
-				message += '\n本轮票数统计';
+				message += '\n本轮票数统计：';
 				for (let playerId in countResult) {
 					const player = this.getPlayer(playerId);
-					message += `${player.displayName} 获得 ${countResult[playerId].length} 票，来自：`
+					message += `\n${player.displayName} 获得 ${countResult[playerId].length} 票，来自：`
 					for (let index in countResult[playerId]) {
 						message += countResult[playerId][index].displayName;
 						if (index + 1 !== countResult[playerId].length) {
