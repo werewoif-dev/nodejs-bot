@@ -3,6 +3,7 @@ const sleep = require('sleep-promise');
 const utils = require('../utils');
 const config = require('../../config');
 
+const Logger = require('./logger');
 const Player = require('./player');
 const Voter = require('./voter');
 const Seer = require('./roles/seer');
@@ -384,7 +385,7 @@ class Game {
 		this.addPlayer(new Player(id));
 		const currentPlayer = this.getPlayer(id);
 		await this.sendGroup(`[CQ:at,qq=${currentPlayer.id}] 玩家 ${currentPlayer.getNick()} 注册成功！`);
-		await this.logger.listAllPlayers();
+		await this.helper.listAllPlayers();
 		await currentPlayer.send('hello！我是狼人杀 bot (*^▽^*)\n游玩前建议阅读说明书：https://github.com/memset0/QQbot-The-Werewolves-of-Millers-Hollow，别忘了给个 star 哦');
 	}
 
@@ -403,13 +404,13 @@ class Game {
 
 		this.removePlayer(this.getPlayer(id));
 		await this.sendGroup(`[CQ:at,qq=${id}] 成功取消注册`);
-		await this.logger.listAllPlayers();
+		await this.helper.listAllPlayers();
 	}
 
 	async status() {
 		this.log('Status');
 
-		await this.logger.listAllPlayers();
+		await this.helper.listAllPlayers();
 	}
 
 	constructor(app, bot) {
@@ -418,6 +419,7 @@ class Game {
 		this.started = false;
 		this.playerList = [];
 
+		this.logger = new Logger();
 		this.templateList = config.templates;
 
 		this.roles = {
@@ -429,7 +431,7 @@ class Game {
 		};
 		this.voter = new Voter(this);
 
-		this.logger = {
+		this.helper = {
 			listAllPlayers: async () => {
 				let message = '';
 				if (this.playerList.length) {

@@ -1,5 +1,7 @@
 config.yml
 koishi.config.js
+go-cqhttp
+go-cqhttp.lnk
 
 # Logs
 logs

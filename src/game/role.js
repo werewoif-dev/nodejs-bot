@@ -120,7 +120,9 @@ class Role {
 
 	constructor(game) {
 		this.game = game;
+		this.logger = this.game.logger;
 		this.sendGroup = (message) => this.game.sendGroup(message);
+		this.sendPlayer = (message) => this.game.sendPlayer(message);
 
 		this.roundId = null;
 		this.roundType = null;

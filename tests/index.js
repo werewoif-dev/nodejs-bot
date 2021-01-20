@@ -1,1 +1,2 @@
-require('./game/firstNight');
+require('./game/roles');
+require('./game/vote');

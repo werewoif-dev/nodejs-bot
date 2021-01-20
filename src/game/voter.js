@@ -125,7 +125,7 @@ class Voter {
 		}
 		this.log('Result', response ? response.displayName : response, maxVoteNumber);
 
-		await this.game.logger.listVotes(this.result, countResult);
+		await this.game.helper.listVotes(this.result, countResult);
 
 		this.started = false;
 		this.resolver(response);

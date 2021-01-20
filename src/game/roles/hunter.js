@@ -62,7 +62,7 @@ class Hunter extends Role {
 
 		this.helpMessage = [
 			'shoot <player>：开枪带走 <player>',
-			'注意：你的技能只能在出局时使用，且如果你被女巫毒死时将不能发动技能',
+			'注意：你的技能只能在出局时使用，且如果被女巫毒死时不能发动技能',
 		];
 	}
 }
