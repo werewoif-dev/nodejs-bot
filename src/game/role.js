@@ -90,10 +90,10 @@ class Role {
 				if (this.timeLimitKey === myKey) {
 					timeLimit = warnTime;
 					if (warnTime) {
-						this.chat(`你还有 ${warnTime / 1000} 秒的决策时间，超时将按照 pass 进行结算`);
+						this.send(`你还有 ${warnTime / 1000} 秒的决策时间，超时将按照 pass 进行结算`);
 					} else {
 						await sleep(150);
-						this.chat('决策超时，自动结算');
+						this.send('决策超时，自动结算');
 						resolver();
 					}
 				} else {
@@ -128,7 +128,8 @@ class Role {
 		this.roundType = null;
 
 		this.playerList = [];
-
+		this.commands = [];
+		this.helpMessage = [];
 	}
 }
 

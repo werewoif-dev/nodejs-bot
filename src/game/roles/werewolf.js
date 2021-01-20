@@ -19,9 +19,9 @@ class Werewolf extends Role {
 		await this.send(message);
 	}
 
-	teamChat(player, message) {
+	chat(player, message) {
 		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			player.send('teamChat 命令不合法');
+			player.send('chat 命令不合法');
 			return;
 		}
 
@@ -64,6 +64,10 @@ class Werewolf extends Role {
 		this.endTurn();
 	}
 
+	boom(player) {
+		
+	}
+
 	processNight(roundId) {
 		this.roundId = roundId;
 		this.roundType = 'night';
@@ -88,6 +92,7 @@ class Werewolf extends Role {
 		super(game);
 
 		this.name = '狼人';
+		this.commands = ['chat', 'boom', 'kill', 'pass'];
 
 		this.helpMessage = [
 			'# <message> 或 chat <message>：可以进行队内交流',

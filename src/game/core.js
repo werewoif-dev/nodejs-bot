@@ -79,6 +79,44 @@ class Game {
 		return null;
 	}
 
+	getAlivePlayerList() {
+		let alivePlayerList = [];
+		for (let player of this.playerList) {
+			if (player.alive) {
+				alivePlayerList.push(player.alive);
+			}
+		}
+		return alivePlayerList;
+	}
+
+	findNextAlivePlayer(currentPlayer) {
+		let targetPlace = currentPlayer.place;
+		while (targetPlace === currentPlayer.place || !this.getPlayer(targetPlace).alive) {
+			targetPlace++;
+			if (targetPlace === this.playerList.length + 1) {
+				targetPlace = 1;
+			}
+			if (targetPlace === currentPlayer.place) {
+				return null;
+			}
+		}
+		return this.getPlayer(targetPlace);
+	}
+
+	findPrevAlivePlayer(currentPlayer) {
+		let targetPlace = currentPlayer.place;
+		while (targetPlace === currentPlayer.place || !this.getPlayer(targetPlace).alive) {
+			targetPlace--;
+			if (targetPlace === 0) {
+				targetPlace = this.playerList.length;
+			}
+			if (targetPlace === currentPlayer.place) {
+				return null;
+			}
+		}
+		return this.getPlayer(targetPlace);
+	}
+
 	async setRole(player, role) {
 		console.log('[ROLE]', 'Set', player.displayName, 'To', role);
 		player.setRole(role);
@@ -242,6 +280,10 @@ class Game {
 		}
 		utils.shuffle(diedPlayerList);
 
+		if (roundId === 1 && config.query('rule.sheriff', false)) {
+			// 警长竞选
+		}
+
 		let message = `第 ${roundId} 个晚上结束了，`;
 		if (diedPlayerList.length === 0) {
 			message += `今天是平安夜`;
@@ -255,28 +297,84 @@ class Game {
 		}
 		await this.sendGroup(message);
 
-		for (let i = 0; i < diedPlayerList.length; i++) {
-			const currentPlayer = diedPlayerList[i];
-			await this.processKilled(currentPlayer);
+		for (let diedPlayer of diedPlayerList) {
+			await this.processKilled(diedPlayer);
 		}
 
 		if (this.checkWinCondition().res) {
 			await this.stop();
 		} else {
-			await this.processDay(roundId);
+			await this.processDay(roundId, diedPlayerList);
 		}
 	}
 
-	async processDay(roundId) {
+	async processDay(roundId, diedPlayerList = []) {
 		this.roundId = roundId;
 		this.roundType = 'day';
 
-		await this.sendGroup(`第 ${roundId} 个白天开始了，请进行投票`);
-		let voteResult = await this.voter.next();
+		await this.sendGroup(`第 ${roundId} 个白天开始了，请进行发言`);
 
-		if (!voteResult) {
-			await this.sendGroup('第一轮投票没有结果，请发言并进行第二轮投票');
-			voteResult = await this.voter.next();
+		let speechOrder;
+		const alivePlayerList = this.getAlivePlayerList();
+		const generateSpeechOrder = (firstPlayer, side, playerList = alivePlayerList) => {
+			let speechOrder = [];
+			let index = playerList.indexOf(firstPlayer);
+			do {
+				if (side === 'right') {
+					index++;
+					if (index === playerList.length) {
+						index = 0;
+					}
+				} else {
+					if (index === 0) {
+						index = playerList.length;
+					}
+					index--;
+				}
+				speechOrder.push(playerList[index]);
+			} while (index != playerList.indexOf(firstPlayer));
+			return speechOrder;
+		};
+		if (this.sheriff && this.sheriff.alive) {
+			if (diedPlayerList.length === 1) {
+				await this.sendGroup('请警长选择死左死右发言');
+				let diedPlayer = diedPlayerList[0];
+				let side = await this.sheriff.waitForReceiveGroup(['left', 'right']);
+				if (side === 'left') {
+					speechOrder = generateSpeechOrder(this.findPrevAlivePlayer(diedPlayer), 'left');
+				} else {
+					speechOrder = generateSpeechOrder(this.findNextAlivePlayer(diedPlayer), 'right');
+				}
+			} else {
+				await this.sendGroup('请警长选择警左警右发言');
+				let side = await this.sheriff.waitForReceiveGroup(['left', 'right']);
+				speechOrder = generateSpeechOrder(this.sheriff, side);
+			}
+		} else {
+			await this.sendGroup('本局游戏没有警长，采取随机顺序发言');
+			if (diedPlayerList.length === 1) {
+				let diedPlayer = diedPlayerList[0];
+				if (utils.random.choose(['left', 'right']) === 'left') {
+					speechOrder = generateSpeechOrder(this.findPrevAlivePlayer(diedPlayer), 'left');
+				} else {
+					speechOrder = generateSpeechOrder(this.findNextAlivePlayer(diedPlayer), 'right');
+				}
+			} else {
+				speechOrder = generateSpeechOrder(utils.random.choose(alivePlayerList), utils.random.choose(['left', 'right']));
+			}
+		}
+
+		await this.speech.start(speechOrder);
+		await this.sendGroup('发言完毕，请投票');
+
+		let voteResult = await this.voter.start();
+
+		if (voteResult.length !== 1) {
+			await this.sendGroup('第一轮投票没有结果，请进行第二轮发言');
+			await this.speech.start(generateSpeechOrder(utils.random.choose(voteResult), utils.random.choose(['left', 'right']), voteResult));
+			await this.sendGroup('发言完毕，请投票');
+
+			voteResult = await this.voter.start();
 		}
 
 		if (voteResult) {
@@ -430,6 +528,8 @@ class Game {
 			villager: new Villager(this),
 		};
 		this.voter = new Voter(this);
+
+		this.sheriff = null;
 
 		this.helper = {
 			listAllPlayers: async () => {

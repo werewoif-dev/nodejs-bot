@@ -2,6 +2,16 @@ const shuffleArray = require('shuffle-array');
 const sleep = require('sleep-promise');
 
 const utils = {
+	random: {
+		int(start, end) {
+			return Math.floor(Math.random() * (end - start)) + start;
+		},
+
+		choose(array) {
+			return array[utils.random.int(0, array.length)];
+		}
+	},
+
 	shuffle(array) {
 		if (!app.test) {
 			shuffleArray(array);

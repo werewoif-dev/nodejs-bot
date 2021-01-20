@@ -64,9 +64,9 @@ module.exports = async (app) => {
 						game.voter.pass(player);
 					} else if (player.role === 'werewolf') {
 						if (message.startsWith('# ')) {
-							game.roles.werewolf.teamChat(player, message.slice(2));
+							game.roles.werewolf.chat(player, message.slice(2));
 						} else if (message.startsWith('chat ')) {
-							game.roles.werewolf.teamChat(player, message.slice(5));
+							game.roles.werewolf.chat(player, message.slice(5));
 						} else if (message.startsWith('kill ')) {
 							game.roles.werewolf.kill(player, targetPlayer);
 						} else if (message === 'pass') {

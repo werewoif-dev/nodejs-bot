@@ -81,7 +81,7 @@ class Voter {
 		}
 	}
 
-	next() {
+	start() {
 		if (this.resolver || this.rejecter) {
 			console.error('ERROR! A vote is already started!');
 		}
@@ -111,19 +111,19 @@ class Voter {
 		}
 		this.log('End', voteCounter);
 
-		let response = null;
+		let response = [];
 		let maxVoteNumber = -1;
 		for (let targetPlayerId in voteCounter) {
 			let voteNumber = voteCounter[targetPlayerId];
 			this.log('>', targetPlayerId, voteNumber);
 			if (voteNumber > maxVoteNumber) {
 				maxVoteNumber = voteNumber;
-				response = this.game.getPlayer(targetPlayerId);
+				response = [this.game.getPlayer(targetPlayerId)];
 			} else if (voteNumber == maxVoteNumber) {
-				response = null;
+				response.push(this.game.getPlayer(targetPlayerId));
 			}
 		}
-		this.log('Result', response ? response.displayName : response, maxVoteNumber);
+		this.log('Result', JSON.parse(response), maxVoteNumber);
 
 		await this.game.helper.listVotes(this.result, countResult);
 

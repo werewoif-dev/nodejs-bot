@@ -59,6 +59,7 @@ class Hunter extends Role {
 		super(game);
 
 		this.name = '猎人';
+		this.commands = ['shoot'];
 
 		this.helpMessage = [
 			'shoot <player>：开枪带走 <player>',

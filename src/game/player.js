@@ -23,6 +23,22 @@ class Player {
 		global.bot.sendPrivateMsg(this.id, message);
 	}
 
+	receive(message) {
+
+	}
+
+	receiveGroup(message) {
+
+	}
+
+	async waitForReceive(message) {
+
+	}
+
+	async waitForReceiveGroup(message) {
+
+	}
+
 	setRole(role) {
 		this.role = role;
 	}
