@@ -6,6 +6,7 @@ const config = require('../../config');
 const Logger = require('./logger');
 const Player = require('./player');
 const Voter = require('./voter');
+const Speech = require('./speech');
 const Seer = require('./roles/seer');
 const Hunter = require('./roles/hunter');
 const Witch = require('./roles/witch');
@@ -480,7 +481,7 @@ class Game {
 			return;
 		}
 
-		this.addPlayer(new Player(id));
+		this.addPlayer(new Player(id, this.game));
 		const currentPlayer = this.getPlayer(id);
 		await this.sendGroup(`[CQ:at,qq=${currentPlayer.id}] 玩家 ${currentPlayer.getNick()} 注册成功！`);
 		await this.helper.listAllPlayers();
@@ -517,7 +518,7 @@ class Game {
 		this.started = false;
 		this.playerList = [];
 
-		this.logger = new Logger();
+		this.config = config;
 		this.templateList = config.templates;
 
 		this.roles = {
@@ -527,7 +528,9 @@ class Game {
 			hunter: new Hunter(this),
 			villager: new Villager(this),
 		};
+		this.logger = new Logger();
 		this.voter = new Voter(this);
+		this.speech = new Speech(this);
 
 		this.sheriff = null;
 

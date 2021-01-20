@@ -6,8 +6,8 @@ class Seer extends Role {
 		console.log('[ROLE]', 'Seer', ...arguments);
 	}
 
-	suspect(targetPlayer) {
-		if (!this.isAlive() || !targetPlayer || !this.nightResolver) {
+	suspect(player, targetPlayer) {
+		if (!player.alive || !targetPlayer || !this.nightResolver) {
 			this.send('suspect 命令不合法');
 			return;
 		}

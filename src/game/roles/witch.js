@@ -6,8 +6,8 @@ class Witch extends Role {
 		console.log('[ROLE]', 'Witch', ...arguments);
 	}
 
-	poison(targetPlayer) {
-		if (!this.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+	poison(player, targetPlayer) {
+		if (!player.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.send('posion 命令不合法');
 			return;
 		}
@@ -25,8 +25,8 @@ class Witch extends Role {
 		this.endTurn();
 	}
 
-	save(targetPlayer) {
-		if (!this.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+	save(player, targetPlayer) {
+		if (!player.alive || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.send('save 命令不合法');
 			return;
 		}
@@ -54,7 +54,7 @@ class Witch extends Role {
 		this.endTurn();
 	}
 
-	pass() {
+	pass(player) {
 		if (!this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.send('pass 命令不合法');
 			return;

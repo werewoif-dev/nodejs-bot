@@ -6,7 +6,7 @@ class Hunter extends Role {
 		console.log('[ROLE]', 'Hunter', ...arguments);
 	}
 
-	shoot(targetPlayer) {
+	shoot(player, targetPlayer) {
 		if (!targetPlayer || !targetPlayer.alive || !this.killedResolver) {
 			this.send('shoot 命令不合法');
 			return;
@@ -23,7 +23,7 @@ class Hunter extends Role {
 		this.endTurn();
 	}
 
-	pass() {
+	pass(player) {
 		if (!this.killedResolver) {
 			this.send('shoot 命令不合法');
 			return;
