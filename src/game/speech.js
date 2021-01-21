@@ -7,7 +7,7 @@ class Speech {
 				'本轮发言顺序：\n' +
 				speechOrder.map((player, index) => (String.fromCharCode('a'.charCodeAt(0) + index) + '. ' + player.displayName))
 			);
-			for (let currentPlayer of speechOrder) {
+			for (const currentPlayer of speechOrder) {
 				this.currentPlayer = currentPlayer;
 				await this.game.sendGroup(`请 [CQ:at,qq=${currentPlayer.id}] 发言`);
 				await currentPlayer.waitForReceiveGroup(['pass']);

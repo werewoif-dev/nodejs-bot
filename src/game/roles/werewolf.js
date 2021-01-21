@@ -9,7 +9,7 @@ class Werewolf extends Role {
 		}
 
 		let message = '本局游戏中的狼有：';
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			message += '\n' + player.displayName;
 		}
 		await this.send(message);
@@ -22,7 +22,7 @@ class Werewolf extends Role {
 		}
 
 		this.log('Team Chat', player.displayName, message);
-		for (let currentPlayer of this.playerList) {
+		for (const currentPlayer of this.playerList) {
 			if (player.id != currentPlayer.id) {
 				currentPlayer.send(`(${player.displayName}) ${utils.encodeMessage(message)}`);
 			}
@@ -36,7 +36,7 @@ class Werewolf extends Role {
 		}
 
 		this.log('Kill', targetPlayer.displayName, 'by', killer.displayName);
-		for (let currentPlayer of this.playerList) {
+		for (const currentPlayer of this.playerList) {
 			currentPlayer.send(`${killer.displayName} 决定杀害 ${targetPlayer.displayName}`);
 		}
 
@@ -52,7 +52,7 @@ class Werewolf extends Role {
 		}
 
 		this.log('Pass', 'by', player.displayName);
-		for (let currentPlayer of this.playerList) {
+		for (const currentPlayer of this.playerList) {
 			currentPlayer.send(`${player.displayName} 决定跳过本回合`);
 		}
 

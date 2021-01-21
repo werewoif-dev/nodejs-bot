@@ -10,7 +10,7 @@ class Voter {
 
 	countAlivePlayer() {
 		let alivePlayerNumber = 0;
-		for (let player of this.game.playerList) {
+		for (const player of this.game.playerList) {
 			if (player.alive) {
 				alivePlayerNumber += 1;
 			}
@@ -96,7 +96,7 @@ class Voter {
 	async end() {
 		let voteCounter = {};
 		let countResult = [];
-		for (let playerId in this.result) {
+		for (const playerId in this.result) {
 			const targetPlayer = this.result[playerId];
 			if (targetPlayer) {
 				if (voteCounter[targetPlayer.id]) {
@@ -112,7 +112,7 @@ class Voter {
 
 		let response = [];
 		let maxVoteNumber = -1;
-		for (let targetPlayerId in voteCounter) {
+		for (const targetPlayerId in voteCounter) {
 			let voteNumber = voteCounter[targetPlayerId];
 			this.log('>', targetPlayerId, voteNumber);
 			if (voteNumber > maxVoteNumber) {

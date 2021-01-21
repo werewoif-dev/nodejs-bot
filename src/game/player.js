@@ -131,7 +131,7 @@ class Player {
 		this.roleClass = null;
 		this.place = null;
 
-		for (let currentId in config.nicks) {
+		for (const currentId in config.nicks) {
 			if (currentId == id) {
 				this.setNick(config.nicks[currentId]);
 				break;

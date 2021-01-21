@@ -10,7 +10,7 @@ const config = configParser(fs.readFileSync(configDir).toString());
 config.query = function (path, defaultValue = undefined) {
 	const keyList = path.split('.');
 	let ctx = config;
-	for (let key of keyList) {
+	for (const key of keyList) {
 		if (!Object.keys(ctx).includes(key)) {
 			return defaultValue;
 		}

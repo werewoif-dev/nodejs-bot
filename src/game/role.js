@@ -16,7 +16,7 @@ class Role {
 
 	removePlayer(player) {
 		let index = -1;
-		for (let i in this.playerList) {
+		for (const i in this.playerList) {
 			const currentPlayer = this.playerList[i];
 			if (currentPlayer.id == player.id) {
 				index = i;
@@ -38,7 +38,7 @@ class Role {
 	}
 
 	send(message) {
-		for (let currentPlayer of this.playerList) {
+		for (const currentPlayer of this.playerList) {
 			currentPlayer.send(message);
 		}
 	}
@@ -48,7 +48,7 @@ class Role {
 	}
 
 	isAlive() {
-		for (let currentPlayer of this.playerList) {
+		for (const currentPlayer of this.playerList) {
 			if (currentPlayer.alive) {
 				return true;
 			}
@@ -93,7 +93,7 @@ class Role {
 		this.timeLimitKey = myKey;
 
 		const warnTimeInterval = [15 * 1000, 5 * 1000, 0];
-		for (let warnTime of warnTimeInterval) {
+		for (const warnTime of warnTimeInterval) {
 			if (timeLimit > warnTime) {
 				await sleep(timeLimit - warnTime);
 

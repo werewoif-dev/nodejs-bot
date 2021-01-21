@@ -42,7 +42,7 @@ class Game {
 
 	removePlayer(player) {
 		let index = -1;
-		for (let i in this.playerList) {
+		for (const i in this.playerList) {
 			const registeredPlayer = this.playerList[i];
 			if (registeredPlayer.id == player.id) {
 				index = i;
@@ -57,22 +57,22 @@ class Game {
 	}
 
 	getPlayer(input) {
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (player.id === parseInt(input)) {
 				return player;
 			}
 		}
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (player.place === parseInt(input)) {
 				return player;
 			}
 		}
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (player.nick === String(input)) {
 				return player;
 			}
 		}
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (player.displayName === String(input)) {
 				return player;
 			}
@@ -82,7 +82,7 @@ class Game {
 
 	getAlivePlayerList() {
 		let alivePlayerList = [];
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (player.alive) {
 				alivePlayerList.push(player);
 			}
@@ -127,7 +127,7 @@ class Game {
 
 	getTemplate() {
 		const playerNumber = this.playerList.length;
-		for (let template of this.templateList) {
+		for (const template of this.templateList) {
 			if (template.length === playerNumber) {
 				return template;
 			}
@@ -145,7 +145,7 @@ class Game {
 			let flag
 			let counter
 			flag = false;
-			for (let player of this.playerList) {
+			for (const player of this.playerList) {
 				if (player.role !== 'werewolf' && player.alive) {
 					flag = true;
 				}
@@ -158,7 +158,7 @@ class Game {
 				};
 			}
 			flag = false;
-			for (let player of this.playerList) {
+			for (const player of this.playerList) {
 				if (player.role === 'werewolf' && player.alive) {
 					flag = true;
 				}
@@ -171,7 +171,7 @@ class Game {
 				};
 			}
 			counter = 0;
-			for (let player of this.playerList) {
+			for (const player of this.playerList) {
 				if (player.alive) {
 					if (player.role === 'werewolf') {
 						counter++;
@@ -193,7 +193,7 @@ class Game {
 			let flag_2
 			flag_1 = false;
 			flag_2 = false;
-			for (let player of this.playerList) {
+			for (const player of this.playerList) {
 				if (player.role === 'villager') {
 					flag_1 = true;
 					if (player.alive) {
@@ -210,7 +210,7 @@ class Game {
 			}
 			flag_1 = false;
 			flag_2 = false;
-			for (let player of this.playerList) {
+			for (const player of this.playerList) {
 				if (player.role !== 'werewolf' && player.role !== 'villager') {
 					flag_1 = true;
 					if (player.alive) {
@@ -226,7 +226,7 @@ class Game {
 				};
 			}
 			flag_2 = false;
-			for (let player of this.playerList) {
+			for (const player of this.playerList) {
 				if (player.role === 'werewolf' && player.alive) {
 					flag_2 = true;
 				}
@@ -275,7 +275,7 @@ class Game {
 		if (this.roles.witch.poisonedPlayer) {
 			diedPlayerList.push(this.roles.witch.poisonedPlayer);
 		}
-		for (let currentPlayer of diedPlayerList) {
+		for (const currentPlayer of diedPlayerList) {
 			currentPlayer.alive = false;
 		}
 		utils.random.shuffle(diedPlayerList);
@@ -297,7 +297,7 @@ class Game {
 		}
 		await this.sendGroup(message);
 
-		for (let diedPlayer of diedPlayerList) {
+		for (const diedPlayer of diedPlayerList) {
 			await this.processKilled(diedPlayer);
 		}
 
@@ -402,7 +402,7 @@ class Game {
 			return;
 		}
 
-		for (let roleName in this.roles) {
+		for (const roleName in this.roles) {
 			const roleClass = this.roles[roleName];
 			roleClass.resetPlayer();
 		}
@@ -410,7 +410,7 @@ class Game {
 		let roleList = this.getTemplate();
 		utils.random.shuffle(roleList);
 
-		for (let i in roleList) {
+		for (const i in roleList) {
 			const player = this.playerList[i];
 			const role = roleList[i];
 
@@ -418,10 +418,10 @@ class Game {
 			await this.setRole(player, role);
 		}
 
-		for (let roleName in this.roles) {
+		for (const roleName in this.roles) {
 			const roleClass = this.roles[roleName];
 			await roleClass.onGameStart();
-			for (let player of roleClass.playerList) {
+			for (const player of roleClass.playerList) {
 				roleClass.help(player);
 			}
 		}
@@ -449,13 +449,13 @@ class Game {
 		let message = '游戏结束！\n' +
 			`因为${result.message}，${result.winner}阵营获得胜利\n` +
 			'存活玩家：\n';
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (player.alive) {
 				message += `<${this.roles[player.role].getDisplayName()}> ${player.displayName} [CQ:at,qq=${player.id}]\n`;
 			}
 		}
 		message += '死亡玩家：\n';
-		for (let player of this.playerList) {
+		for (const player of this.playerList) {
 			if (!player.alive) {
 				message += `<${this.roles[player.role].getDisplayName()}> ${player.displayName} [CQ:at,qq=${player.id}]\n`;
 			}
@@ -541,7 +541,7 @@ class Game {
 				let message = '';
 				if (this.playerList.length) {
 					message += `已经注册的玩家有 ${this.playerList.length} 个：\n`;
-					for (let i in this.playerList) {
+					for (const i in this.playerList) {
 						const player = this.playerList[i];
 						if (this.started) {
 							message += `${player.displayName} (${player.alive ? '存活' : '出局'})\n`;
@@ -558,15 +558,15 @@ class Game {
 			listVotes: async (voteResult, countResult) => {
 				let message = '';
 				message += '本轮票型：';
-				for (let player of this.playerList) {
+				for (const player of this.playerList) {
 					const targetPlayer = voteResult[player.id];
 					message += `\n${player.displayName} → ${targetPlayer.displayName}`;
 				}
 				message += '\n本轮票数统计：';
-				for (let playerId in countResult) {
+				for (const playerId in countResult) {
 					const player = this.getPlayer(playerId);
 					message += `\n${player.displayName} 获得 ${countResult[playerId].length} 票，来自：`
-					for (let index in countResult[playerId]) {
+					for (const index in countResult[playerId]) {
 						message += countResult[playerId][index].displayName;
 						if (index + 1 !== countResult[playerId].length) {
 							message += '，';
