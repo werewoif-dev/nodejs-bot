@@ -89,7 +89,7 @@ class Werewolf extends Role {
 
 		this.name = 'werewolf';
 		this.displayName = '狼人';
-		this.commands.concat(['boom', 'kill', 'pass']);
+		this.commands = this.commands.concat(['boom', 'kill', 'pass']);
 
 		this.helpMessage = [
 			'# <message> 或 chat <message>：可以进行队内交流',

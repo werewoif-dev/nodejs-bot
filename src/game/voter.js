@@ -27,7 +27,7 @@ class Voter {
 	}
 
 	vote(player, targetPlayer) {
-		if (!this.resolver || !this.rejecter) {
+		if (!this.promise) {
 			player.send('投票未开始');
 			return;
 		}
@@ -58,7 +58,7 @@ class Voter {
 	}
 
 	pass(player) {
-		if (!this.resolver || !this.rejecter) {
+		if (!this.promise) {
 			player.send('投票未开始');
 			return;
 		}
@@ -82,15 +82,14 @@ class Voter {
 	}
 
 	start() {
-		if (this.resolver || this.rejecter) {
+		if (this.promise) {
 			console.error('ERROR! A vote is already started!');
+			return;
 		}
 
-		this.started = true;
-		this.result = {};
 		return new Promise((resolve, reject) => {
-			this.resolver = resolve;
-			this.rejecter = reject;
+			this.promise = { resolve, reject };
+			this.result = {};
 		});
 	}
 
@@ -123,19 +122,18 @@ class Voter {
 				response.push(this.game.getPlayer(targetPlayerId));
 			}
 		}
-		this.log('Result', JSON.parse(response), maxVoteNumber);
+		this.log('Result', response.map(player => player.displayName), maxVoteNumber);
 
 		await this.game.helper.listVotes(this.result, countResult);
 
-		this.started = false;
-		this.resolver(response);
-		this.resolver = undefined;
-		this.rejecter = undefined;
+		this.promise.resolve(response);
+		this.promise = null;
 	}
 
 	constructor(game) {
 		this.game = game;
-		this.started = false;
+
+		this.promise = null;
 	}
 }
 

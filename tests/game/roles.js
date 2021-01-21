@@ -28,7 +28,7 @@ try {
 			[g[3], 'register'],
 			[g[0], 'start game'],
 			[p[0], 'kill 1'],
-			[g[0], 'stop game']
+			[g[0], 'stop game'],
 		]);
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
@@ -38,7 +38,7 @@ try {
 			[g[0], 'start game'],
 			[p[0], 'kill null'],
 			[p[0], 'kill 2'],
-			[g[0], 'stop game']
+			[g[0], 'stop game'],
 		]);
 		global.game.setTemplate(['werewolf', 'werewolf', 'werewolf', 'villager']);
 		await utils.receiveByInterval(interval, [
@@ -126,6 +126,10 @@ try {
 			[g[3], 'register'],
 			[g[0], 'start game'],
 			[p[0], 'pass'],
+			[g[0], 'pass'],
+			[g[1], 'pass'],
+			[g[2], 'pass'],
+			[g[3], 'pass'],
 			[p[0], 'vote 2'],
 			[p[1], 'vote 2'],
 			[p[2], 'vote 2'],

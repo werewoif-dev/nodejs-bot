@@ -5,7 +5,7 @@ const config = require('../../config');
 function parseCommand(message) {
 	const spaceIndex = message.indexOf(' ');
 	return {
-		command: message.slice(0, spaceIndex),
+		command: ~spaceIndex ? message.slice(0, spaceIndex) : message,
 		targetPlayer: ~spaceIndex ? game.getPlayer(message.slice(spaceIndex + 1)) : null,
 		fit: spaceIndex === -1
 	};
@@ -30,33 +30,48 @@ class Player {
 	}
 
 	send(message) {
-		console.log(colors.cyan('[SEND P]'), this.id, message.slice(0, 40).replace(/\n/g,colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
+		console.log(colors.cyan('[SEND P]'), this.id, message.slice(0, 40).replace(/\n/g, colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
 		this.game.bot.sendPrivateMsg(this.id, message);
 	}
 
 	receive(message) {
+		console.log(colors.magenta('[RECEIVE P]'), this.displayName, message);
 		if (this.promise.private && this.promise.private.data.possibleMessages.includes(message)) {
-			this.promise.private.resolve(message);
-			return;
+			return this.promise.private.resolve(message);
 		}
 		const { command, targetPlayer, fit } = parseCommand(message);
+		if (this.game.voter.promise) {
+			if (command === 'vote' && targetPlayer) {
+				return this.game.voter.vote(this, targetPlayer);
+			} else if (command === 'pass' && fit) {
+				return this.game.voter.pass(this);
+			}
+		}
 		if (this.role && this.roleClass.commands.includes(command)) {
 			if (fit) {
-				this.roleClass[command](this);
+				return this.roleClass[command](this);
 			} else {
-				this.roleClass[command](this, targetPlayer);
+				return this.roleClass[command](this, targetPlayer);
 			}
+		}
+		if (this.roleClass.isWolf() && message.startsWith('# ')) {
+			return this.roleClass.chat(this, message.slice(2));
 		}
 	}
 
 	receiveGroup(message) {
-		if (this.promise.group.data.possibleMessages.includes(message)) {
-			this.promise.group.resolve(message);
-			return;
+		if (this.promise.group && this.promise.group.data.possibleMessages.includes(message)) {
+			return this.promise.group.resolve(message);
 		}
-		console.log('receive group', message);
-		if (['status', 'start game', 'stop game'].includes(message)) {
-			this.game[message]();
+		console.log(colors.magenta('[RECEIVE G]'), this.displayName, message);
+		if (message === 'status') {
+			return this.game.status();
+		}
+		if (message === 'start game') {
+			return this.game.start();
+		}
+		if (message === 'stop game') {
+			return this.game.stop();
 		}
 	}
 

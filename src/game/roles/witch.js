@@ -3,7 +3,7 @@ const config = require('../../../config');
 
 class Witch extends Role {
 	poison(player, targetPlayer) {
-		if (!player.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
+		if (!player.alive || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.send('posion 命令不合法');
 			return;
 		}
@@ -97,7 +97,7 @@ class Witch extends Role {
 
 		this.name = 'witch';
 		this.displayName = '女巫';
-		this.commands.concat(['save', 'poison', 'pass']);
+		this.commands = this.commands.concat(['save', 'poison', 'pass']);
 
 		this.saved = false;
 		this.poisoned = false;

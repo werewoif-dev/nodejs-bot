@@ -21,6 +21,7 @@ module.exports = async (app) => {
 
 	app.on('message', async (session) => {
 		const { message, messageType, sender } = session;
+
 		if (messageType === 'private' && !game.getPlayer(session.sender.userId)) {
 			return; // 不是游戏中玩家发送的消息
 		}
@@ -29,7 +30,6 @@ module.exports = async (app) => {
 		}
 
 		const player = game.getPlayer(sender.userId);
-		console.log(colors.magenta('[RECEIVE]'), messageType, message, sender.userId, player ? player.displayName : player);
 
 		if (messageType === 'group' && !player) {
 			if (message === 'register') {
@@ -41,16 +41,15 @@ module.exports = async (app) => {
 			}
 		}
 
-		if (messageType === 'group' && player) {
-			player.receive(message);
-			return;
-		}
-
 		if (messageType === 'private' && player) {
 			player.receive(message);
 			return;
 		}
 
+		if (messageType === 'group' && player) {
+			player.receiveGroup(message);
+			return;
+		}
 	});
 
 };

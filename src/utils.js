@@ -4,18 +4,25 @@ const sleep = require('sleep-promise');
 const utils = {
 	random: {
 		int(start, end) {
+			if (app.test) {
+				return start;
+			}
 			return Math.floor(Math.random() * (end - start)) + start;
 		},
 
 		choose(array) {
+			if (app.start) {
+				return array[0];
+			}
 			return array[utils.random.int(0, array.length)];
-		}
-	},
+		},
 
-	shuffle(array) {
-		if (!app.test) {
+		shuffle(array) {
+			if (app.test) {
+				return;
+			}
 			shuffleArray(array);
-		}
+		},
 	},
 
 	decodeMessage(message) {

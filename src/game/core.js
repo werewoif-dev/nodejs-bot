@@ -20,7 +20,7 @@ class Game {
 	}
 
 	async sendGroup(message) {
-		console.log(colors.cyan('[SEND G]'), message.slice(0, 40).replace(/\n/g,colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
+		console.log(colors.cyan('[SEND G]'), message.slice(0, 40).replace(/\n/g, colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
 		return await this.bot.sendGroupMsg(config.group, message);
 	}
 
@@ -84,7 +84,7 @@ class Game {
 		let alivePlayerList = [];
 		for (let player of this.playerList) {
 			if (player.alive) {
-				alivePlayerList.push(player.alive);
+				alivePlayerList.push(player);
 			}
 		}
 		return alivePlayerList;
@@ -278,7 +278,7 @@ class Game {
 		for (let currentPlayer of diedPlayerList) {
 			currentPlayer.alive = false;
 		}
-		utils.shuffle(diedPlayerList);
+		utils.random.shuffle(diedPlayerList);
 
 		if (roundId === 1 && config.query('rule.sheriff', false)) {
 			// 警长竞选
@@ -320,6 +320,7 @@ class Game {
 			let speechOrder = [];
 			let index = playerList.indexOf(firstPlayer);
 			do {
+				speechOrder.push(playerList[index]);
 				if (side === 'right') {
 					index++;
 					if (index === playerList.length) {
@@ -331,7 +332,6 @@ class Game {
 					}
 					index--;
 				}
-				speechOrder.push(playerList[index]);
 			} while (index != playerList.indexOf(firstPlayer));
 			return speechOrder;
 		};
@@ -354,13 +354,13 @@ class Game {
 			await this.sendGroup('本局游戏没有警长，采取随机顺序发言');
 			if (diedPlayerList.length === 1) {
 				let diedPlayer = diedPlayerList[0];
-				if (utils.random.choose(['left', 'right']) === 'left') {
-					speechOrder = generateSpeechOrder(this.findPrevAlivePlayer(diedPlayer), 'left');
-				} else {
+				if (utils.random.choose(['right', 'left']) === 'right') {
 					speechOrder = generateSpeechOrder(this.findNextAlivePlayer(diedPlayer), 'right');
+				} else {
+					speechOrder = generateSpeechOrder(this.findPrevAlivePlayer(diedPlayer), 'left');
 				}
 			} else {
-				speechOrder = generateSpeechOrder(utils.random.choose(alivePlayerList), utils.random.choose(['left', 'right']));
+				speechOrder = generateSpeechOrder(utils.random.choose(alivePlayerList), utils.random.choose(['right', 'left']));
 			}
 		}
 
@@ -371,16 +371,16 @@ class Game {
 
 		if (voteResult.length !== 1) {
 			await this.sendGroup('第一轮投票没有结果，请进行第二轮发言');
-			await this.speech.start(generateSpeechOrder(utils.random.choose(voteResult), utils.random.choose(['left', 'right']), voteResult));
+			await this.speech.start(generateSpeechOrder(utils.random.choose(voteResult), utils.random.choose(['right', 'left']), voteResult));
 			await this.sendGroup('发言完毕，请投票');
 
 			voteResult = await this.voter.start();
 		}
 
-		if (voteResult) {
-			voteResult.alive = false;
-			await this.sendGroup(`投票结束，${voteResult.displayName} 出局了`);
-			await this.processKilled(voteResult);
+		if (voteResult.length === 1) {
+			await this.sendGroup(`投票结束，${voteResult[0].displayName} 出局了`);
+			voteResult[0].alive = false;
+			await this.processKilled(voteResult[0]);
 		} else {
 			await this.sendGroup('投票结束，没有人出局');
 		}
@@ -408,7 +408,7 @@ class Game {
 		}
 
 		let roleList = this.getTemplate();
-		utils.shuffle(roleList);
+		utils.random.shuffle(roleList);
 
 		for (let i in roleList) {
 			const player = this.playerList[i];
@@ -461,10 +461,13 @@ class Game {
 			}
 		}
 		message += '感谢你的游玩';
+		await this.sendGroup(message);
 
 		this.started = false;
 		this.playerList = [];
-		await this.sendGroup(message);
+
+		this.voter.promise = null;
+		this.speech.promise = null;
 	}
 
 	async register(id) {

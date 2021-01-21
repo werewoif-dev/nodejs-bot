@@ -79,6 +79,10 @@ class Role {
 		return this.displayName || this.name;
 	}
 
+	isWolf() {
+		return this.name === 'werewolf';
+	}
+
 	async setTimeLimit(timeLimit, resolver) {
 		if (!timeLimit || isNaN(parseInt(timeLimit))) {
 			return;
