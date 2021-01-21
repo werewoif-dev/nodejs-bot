@@ -65,7 +65,7 @@ class Werewolf extends Role {
 	}
 
 	boom(player) {
-		
+
 	}
 
 	processNight(roundId) {
@@ -92,7 +92,7 @@ class Werewolf extends Role {
 		super(game);
 
 		this.name = '狼人';
-		this.commands = ['chat', 'boom', 'kill', 'pass'];
+		this.commands.concat(['chat', 'boom', 'kill', 'pass']);
 
 		this.helpMessage = [
 			'# <message> 或 chat <message>：可以进行队内交流',

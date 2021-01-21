@@ -16,7 +16,6 @@ class Hunter extends Role {
 
 		this.shotPlayer = targetPlayer;
 
-		const player = this.playerList[0];
 		this.sendGroup(`${player.displayName} 翻枪带走了 ${targetPlayer.displayName}`);
 
 		this.killedResolver();
@@ -59,7 +58,7 @@ class Hunter extends Role {
 		super(game);
 
 		this.name = '猎人';
-		this.commands = ['shoot'];
+		this.commands.concat(['shoot']);
 
 		this.helpMessage = [
 			'shoot <player>：开枪带走 <player>',

@@ -33,12 +33,12 @@ class Player {
 	}
 
 	receive(message) {
-		if (this.promise.private.data.possibleMessages.includes(message)) {
+		if (this.promise.private && this.promise.private.data.possibleMessages.includes(message)) {
 			this.promise.private.resolve(message);
 			return;
 		}
 		const { command, targetPlayer, fit } = parseCommand(message);
-		if (this.roleClass.commands.includes(command)) {
+		if (this.role && this.roleClass.commands.includes(command)) {
 			if (fit) {
 				this.roleClass[command](this);
 			} else {
@@ -51,6 +51,10 @@ class Player {
 		if (this.promise.group.data.possibleMessages.includes(message)) {
 			this.promise.group.resolve(message);
 			return;
+		}
+		console.log('receive group', message);
+		if (['status', 'start game', 'stop game'].includes(message)) {
+			this.game[message]();
 		}
 	}
 
@@ -100,7 +104,7 @@ class Player {
 		this.game = game;
 
 		this.alive = true;
-		this.op = !!this.game.config.op.includes(this.id);
+		this.op = !!(this.game.config.op.includes(this.id));
 
 		this.nick = `nick<${id}>`;
 		this.hasNick = false;

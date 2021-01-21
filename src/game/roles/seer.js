@@ -63,7 +63,7 @@ class Seer extends Role {
 		super(game);
 
 		this.name = '预言家';
-		this.commands = ['suspect', 'pass'];
+		this.commands.concat(['suspect', 'pass']);
 
 		this.helpMessage = [
 			'suspect <player>：查验 <player> 是好人还是坏人',

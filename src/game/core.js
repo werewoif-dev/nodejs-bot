@@ -481,7 +481,7 @@ class Game {
 			return;
 		}
 
-		this.addPlayer(new Player(id, this.game));
+		this.addPlayer(new Player(id, this));
 		const currentPlayer = this.getPlayer(id);
 		await this.sendGroup(`[CQ:at,qq=${currentPlayer.id}] 玩家 ${currentPlayer.getNick()} 注册成功！`);
 		await this.helper.listAllPlayers();

@@ -30,6 +30,7 @@ try {
 			[p[0], 'kill 1'],
 			[g[0], 'stop game']
 		]);
+		return;
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],

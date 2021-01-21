@@ -128,8 +128,9 @@ class Role {
 		this.roundType = null;
 
 		this.playerList = [];
-		this.commands = [];
 		this.helpMessage = [];
+
+		this.commands = ['help'];
 	}
 }
 

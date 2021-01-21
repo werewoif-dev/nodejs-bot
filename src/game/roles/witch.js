@@ -100,7 +100,7 @@ class Witch extends Role {
 		super(game);
 
 		this.name = '女巫';
-		this.commands = ['save', 'poison', 'pass'];
+		this.commands.concat(['save', 'poison', 'pass']);
 
 		this.saved = false;
 		this.poisoned = false;
