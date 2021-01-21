@@ -1,3 +1,5 @@
+const colors = require('colors/safe');
+
 const config = require('../../config');
 
 const Game = require('./core');
@@ -27,7 +29,7 @@ module.exports = async (app) => {
 		}
 
 		const player = game.getPlayer(sender.userId);
-		console.log('[MSG]', messageType, message, sender.userId, player ? player.displayName : player);
+		console.log(colors.magenta('[RECEIVE]'), messageType, message, sender.userId, player ? player.displayName : player);
 
 		if (messageType === 'group' && !player) {
 			if (message === 'register') {

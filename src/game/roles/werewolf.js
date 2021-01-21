@@ -3,10 +3,6 @@ const utils = require('../../utils.js');
 const config = require('../../../config');
 
 class Werewolf extends Role {
-	log() {
-		console.log('[ROLE]', 'Werewolf', ...arguments);
-	}
-
 	async onGameStart() {
 		if (!this.isActive()) {
 			return;
@@ -91,8 +87,9 @@ class Werewolf extends Role {
 	constructor(game) {
 		super(game);
 
-		this.name = '狼人';
-		this.commands.concat(['chat', 'boom', 'kill', 'pass']);
+		this.name = 'werewolf';
+		this.displayName = '狼人';
+		this.commands.concat(['boom', 'kill', 'pass']);
 
 		this.helpMessage = [
 			'# <message> 或 chat <message>：可以进行队内交流',

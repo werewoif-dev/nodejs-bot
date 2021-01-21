@@ -2,10 +2,6 @@ const Role = require('../role');
 const config = require('../../../config');
 
 class Witch extends Role {
-	log() {
-		console.log('[ROLE]', 'Witch', ...arguments);
-	}
-
 	poison(player, targetPlayer) {
 		if (!player.isAlive() || !targetPlayer || !targetPlayer.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
 			this.send('posion 命令不合法');
@@ -99,7 +95,8 @@ class Witch extends Role {
 	constructor(game) {
 		super(game);
 
-		this.name = '女巫';
+		this.name = 'witch';
+		this.displayName = '女巫';
 		this.commands.concat(['save', 'poison', 'pass']);
 
 		this.saved = false;

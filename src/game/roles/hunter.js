@@ -2,10 +2,6 @@ const Role = require('../role');
 const config = require('../../../config');
 
 class Hunter extends Role {
-	log() {
-		console.log('[ROLE]', 'Hunter', ...arguments);
-	}
-
 	shoot(player, targetPlayer) {
 		if (!targetPlayer || !targetPlayer.alive || !this.killedResolver) {
 			this.send('shoot 命令不合法');
@@ -57,7 +53,8 @@ class Hunter extends Role {
 	constructor(game) {
 		super(game);
 
-		this.name = '猎人';
+		this.name = 'hunter';
+		this.displayName = '猎人';
 		this.commands.concat(['shoot']);
 
 		this.helpMessage = [

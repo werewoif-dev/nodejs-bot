@@ -1,3 +1,5 @@
+const colors = require('colors/safe');
+
 const config = require('../../config');
 
 function parseCommand(message) {
@@ -28,7 +30,7 @@ class Player {
 	}
 
 	send(message) {
-		console.log('[CHAT]', this.id, message);
+		console.log(colors.cyan('[SEND P]'), this.id, message.slice(0, 40).replace(/\n/g,colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
 		this.game.bot.sendPrivateMsg(this.id, message);
 	}
 

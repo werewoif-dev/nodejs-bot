@@ -1,4 +1,4 @@
-const sleep = require('sleep-promise');
+const colors = require('colors/safe');
 
 const utils = require('../utils');
 const config = require('../../config');
@@ -20,7 +20,7 @@ class Game {
 	}
 
 	async sendGroup(message) {
-		console.log('[CHAT]', 'Group', message);
+		console.log(colors.cyan('[SEND G]'), message.slice(0, 40).replace(/\n/g,colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
 		return await this.bot.sendGroupMsg(config.group, message);
 	}
 
@@ -119,7 +119,6 @@ class Game {
 	}
 
 	async setRole(player, role) {
-		console.log('[ROLE]', 'Set', player.displayName, 'To', role);
 		player.setRole(role);
 		this.roles[role].addPlayer(player);
 		await player.send(`游戏开始！你的角色是 ${this.roles[role].getDisplayName()}`);

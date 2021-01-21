@@ -1,10 +1,16 @@
+const colors = require('colors/safe');
 const sleep = require('sleep-promise');
 const { Random } = require('koishi-utils');
 
 const utils = require('../utils');
 
 class Role {
+	log() {
+		console.log(colors.brightBlue('[ROLE]'), colors.blue(this.name), ...arguments);
+	}
+
 	addPlayer(player) {
+		this.log('add', player.displayName);
 		this.playerList.push(player);
 	}
 

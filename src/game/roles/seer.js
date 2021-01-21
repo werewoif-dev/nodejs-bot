@@ -2,10 +2,6 @@ const config = require('../../../config');
 const Role = require('../role');
 
 class Seer extends Role {
-	log() {
-		console.log('[ROLE]', 'Seer', ...arguments);
-	}
-
 	suspect(player, targetPlayer) {
 		if (!player.alive || !targetPlayer || !this.nightResolver) {
 			this.send('suspect 命令不合法');
@@ -62,7 +58,8 @@ class Seer extends Role {
 	constructor(game) {
 		super(game);
 
-		this.name = '预言家';
+		this.name = 'seer';
+		this.displayName = '预言家';
 		this.commands.concat(['suspect', 'pass']);
 
 		this.helpMessage = [
