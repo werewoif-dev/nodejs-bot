@@ -117,6 +117,8 @@ class Role {
 		this.roundId = null;
 		this.roundType = null;
 
+		this.promise = null;
+
 		this.dayResolver = undefined;
 		this.skillResolver = undefined;
 		this.nightResolver = undefined;

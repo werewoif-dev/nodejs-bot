@@ -24,8 +24,9 @@ class Logger {
 	}
 
 	check(target) {
-		console.log(colors.green(this.get()));
+		console.log(colors.brightGreen(this.get()));
 		assert.strictEqual(this.get(), target);
+		console.log(colors.green('=>', colors.bgBrightBlue('pass')));
 	}
 
 	constructor() {

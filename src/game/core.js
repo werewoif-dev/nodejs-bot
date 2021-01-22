@@ -364,28 +364,33 @@ class Game {
 			}
 		}
 
-		await this.speech.start(speechOrder);
-		await this.sendGroup('发言完毕，请投票');
-
-		let voteResult = await this.voter.start();
-		if (!this.started) {
-			return;
-		}
-
-		if (voteResult.length !== 1) {
-			await this.sendGroup('第一轮投票没有结果，请进行第二轮发言');
-			await this.speech.start(generateSpeechOrder(utils.random.choose(voteResult), utils.random.choose(['right', 'left']), voteResult));
+		if (await this.speech.process(speechOrder)) {
 			await this.sendGroup('发言完毕，请投票');
 
-			voteResult = await this.voter.start();
-		}
+			let voteResult = await this.voter.start();
+			if (!this.started) {
+				return;
+			}
 
-		if (voteResult.length === 1) {
-			await this.sendGroup(`投票结束，${voteResult[0].displayName} 出局了`);
-			voteResult[0].alive = false;
-			await this.processKilled(voteResult[0]);
-		} else {
-			await this.sendGroup('投票结束，没有人出局');
+			if (voteResult.length !== 1) {
+				await this.sendGroup('第一轮投票没有结果，请进行第二轮发言');
+				if (await this.speech.process(generateSpeechOrder(utils.random.choose(voteResult), utils.random.choose(['right', 'left']), voteResult))) {
+					await this.sendGroup('发言完毕，请投票');
+					voteResult = await this.voter.start();
+				} else {
+					voteResult = null;
+				}
+			}
+
+			if (voteResult) {
+				if (voteResult.length === 1) {
+					await this.sendGroup(`投票结束，${voteResult[0].displayName} 出局了`);
+					voteResult[0].alive = false;
+					await this.processKilled(voteResult[0]);
+				} else {
+					await this.sendGroup('投票结束，没有人出局');
+				}
+			}
 		}
 
 		if (this.checkWinCondition().res) {
@@ -474,6 +479,10 @@ class Game {
 
 		this.voter.promise = null;
 		this.speech.promise = null;
+		for (const roleName in this.roles) {
+			let roleClass = this.roles[roleName];
+			roleClass.promise = null;
+		}
 	}
 
 	async register(id) {
@@ -572,7 +581,7 @@ class Game {
 				message += '本轮票型：';
 				for (const player of this.playerList) {
 					const targetPlayer = voteResult[player.id];
-					message += `\n${player.displayName} → ${targetPlayer.displayName}`;
+					message += `\n${player.displayName} → ${targetPlayer ? targetPlayer.displayName : null}`;
 				}
 				message += '\n本轮票数统计：';
 				for (const playerId in countResult) {

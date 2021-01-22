@@ -1,6 +1,6 @@
 class Speech {
 
-	async start(speechOrder) {
+	async process(speechOrder) {
 		this.game.logger.push('speech', speechOrder.map(player => player.place).join(','));
 		return new Promise(async (resolve, reject) => {
 			this.promise = { resolve, reject };
@@ -17,7 +17,7 @@ class Speech {
 				}
 			}
 			this.currentPlayer = null;
-			this.promise.resolve();
+			this.promise.resolve(true);
 		});
 	}
 
@@ -30,7 +30,7 @@ class Speech {
 			this.currentPlayer = null;
 		}
 		await this.game.sendGroup(`本轮发言中断，直接进入黑夜`);
-		this.promise.resolve();
+		this.promise.resolve(false);
 	}
 
 	constructor(game) {

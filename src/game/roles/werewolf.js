@@ -17,13 +17,12 @@ class Werewolf extends Role {
 
 	chat(player, message) {
 		if (!player || !player.alive || !this.roundId || this.roundType !== 'night' || !this.nightResolver) {
-			player.send('chat 命令不合法');
-			return;
+			return player.send('chat 命令不合法');
 		}
 
 		this.log('Team Chat', player.displayName, message);
 		for (const currentPlayer of this.playerList) {
-			if (player.id != currentPlayer.id) {
+			if (player.id != currentPlayer.id && currentPlayer.alive) {
 				currentPlayer.send(`(${player.displayName}) ${utils.encodeMessage(message)}`);
 			}
 		}
@@ -31,8 +30,7 @@ class Werewolf extends Role {
 
 	kill(player, targetPlayer) {
 		if (!player || !player.alive || !targetPlayer || !targetPlayer.alive || !this.nightResolver) {
-			player.send('kill 命令不合法');
-			return;
+			return player.send('kill 命令不合法');
 		}
 
 		for (const currentPlayer of this.playerList) {
@@ -49,8 +47,7 @@ class Werewolf extends Role {
 
 	pass(player) {
 		if (!player || !player.alive || !this.nightResolver) {
-			player.send('pass 命令不合法');
-			return;
+			return player.send('pass 命令不合法');
 		}
 
 		for (const currentPlayer of this.playerList) {
@@ -64,8 +61,19 @@ class Werewolf extends Role {
 		this.endTurn();
 	}
 
-	boom(player) {
+	async boom(player) {
+		if (!player || !player.alive || !this.game.speech.promise) {
+			return player.send('boom 命令不合法');
+		}
 
+		this.log('boom', player.displayName);
+		this.logger.push('werewolf:boom', player.place);
+
+		player.alive = false;
+		await this.game.processKilled(player);
+
+		await this.sendGroup(`${player.displayName} 自爆`);
+		await this.game.speech.stop(player);
 	}
 
 	processNight(roundId) {

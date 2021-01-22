@@ -141,7 +141,10 @@ class Player {
 			}
 		}
 
-		this.promise = {};
+		this.promise = {
+			priavte: null,
+			group: null,
+		};
 	}
 }
 
