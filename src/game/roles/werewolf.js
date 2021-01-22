@@ -107,6 +107,7 @@ class Werewolf extends Role {
 			'# <message> 或 chat <message>：可以进行队内交流',
 			'kill <player>：决定今晚刀的人',
 			'pass：跳过今晚刀人回合',
+			'boom：自爆，需在发言回合使用，自身出局且游戏直接进入黑夜',
 			'注意：使用 kill 或 pass 命令后，操作回合立刻结束；操作回合结束后狼人没有内部交流权限。'
 		];
 	}

@@ -9,8 +9,8 @@ class TesterApp extends MockedApp {
 }
 
 process.on('unhandledRejection', error => {
-  console.error(error.message);
-  process.exit(1);
+	console.error(error.message);
+	process.exit(1);
 });
 
 module.exports = TesterApp;
