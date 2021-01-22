@@ -14,8 +14,10 @@ class Witch extends Role {
 		}
 
 		this.send(`你用毒药杀了 ${targetPlayer.displayName} 并结束了你的操作回合`);
-		this.log('Poison', targetPlayer.displayName);
 		this.poisonedPlayer = targetPlayer;
+
+		this.log('Poison', targetPlayer.displayName);
+		this.logger.push('witch:poison', player.place, targetPlayer.place);
 
 		this.nightResolver();
 		this.endTurn();
@@ -43,8 +45,10 @@ class Witch extends Role {
 		}
 
 		this.send(`你用解药救了 ${targetPlayer.displayName} 并结束了你的操作回合`);
-		this.log('Save', targetPlayer.displayName);
 		this.savedPlayer = targetPlayer;
+
+		this.log('Save', targetPlayer.displayName);
+		this.logger.push('witch:save', player.place, targetPlayer.place);
 
 		this.nightResolver();
 		this.endTurn();
@@ -56,8 +60,10 @@ class Witch extends Role {
 			return;
 		}
 
-		this.log('Pass');
 		this.send('你结束了你的操作回合');
+
+		this.log('Pass');
+		this.logger.push('witch:pass', player.place);
 
 		this.nightResolver();
 		this.endTurn();

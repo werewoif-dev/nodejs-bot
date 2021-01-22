@@ -1,7 +1,10 @@
+const assert = require('assert');
+const colors = require('colors/safe');
+
 class Logger {
 
-	push(message) {
-		this.log.push(message);
+	push() {
+		this.log.push(Array.from(arguments).join(' '));
 	}
 
 	get() {
@@ -14,6 +17,15 @@ class Logger {
 
 	reset() {
 		this.log = [];
+	}
+
+	equal(target) {
+		return this.get() === target;
+	}
+
+	check(target) {
+		console.log(colors.green(this.get()));
+		assert.strictEqual(this.get(), target);
 	}
 
 	constructor() {

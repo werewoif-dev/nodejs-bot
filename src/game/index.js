@@ -13,6 +13,7 @@ module.exports = async (app) => {
 	global.app = app;
 	global.bot = bot;
 	global.game = game;
+	app.game = game;
 
 	if (app.test) {
 		bot.sendGroupMsg = (message) => { };

@@ -1,6 +1,7 @@
 class Speech {
 
 	async start(speechOrder) {
+		this.game.logger.push('speech', speechOrder.map(player => player.place).join(','));
 		return new Promise(async (resolve, reject) => {
 			this.promise = { resolve, reject };
 			await this.game.sendGroup(
@@ -21,6 +22,9 @@ class Speech {
 	}
 
 	async stop(player) {
+		if (!this.promise) {
+			return;
+		}
 		if (this.currentPlayer) {
 			this.currentPlayer.cancelWaitGroup();
 			this.currentPlayer = null;

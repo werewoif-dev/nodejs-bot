@@ -1,3 +1,4 @@
+const assert = require('assert');
 const { MockedApp } = require('koishi-test-utils');
 
 const utils = require('../utils');
@@ -19,8 +20,13 @@ try {
 			1000000006,
 		]);
 
+		const logger = global.game.logger;
+		const setTemplate = function () {
+			return global.game.setTemplate(Array.from(arguments));
+		}
+
 		// 狼
-		global.game.setTemplate(['werewolf', 'villager', 'villager', 'villager']);
+		setTemplate('werewolf', 'villager', 'villager', 'villager');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -30,6 +36,7 @@ try {
 			[p[0], 'kill 1'],
 			[g[0], 'stop game'],
 		]);
+		logger.check('werewolf:kill 1 1');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -40,7 +47,8 @@ try {
 			[p[0], 'kill 2'],
 			[g[0], 'stop game'],
 		]);
-		global.game.setTemplate(['werewolf', 'werewolf', 'werewolf', 'villager']);
+		logger.check('werewolf:kill 1 2\nspeech 3,4,1');
+		setTemplate('werewolf', 'werewolf', 'werewolf', 'villager');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -52,9 +60,10 @@ try {
 			[p[2], '# how are you'],
 			[p[0], 'kill 4'],
 		]);
+		logger.check('werewolf:kill 1 4');
 
 		// 女巫
-		global.game.setTemplate(['werewolf', 'witch', 'villager', 'villager', 'villager']);
+		setTemplate('werewolf', 'witch', 'villager', 'villager', 'villager');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -66,6 +75,7 @@ try {
 			[p[1], 'save 2'],
 			[g[0], 'stop game'],
 		]);
+		logger.check('werewolf:kill 1 2\nwitch:save 2 2\nspeech 1,2,3,4,5');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -77,6 +87,7 @@ try {
 			[p[1], 'poison 3'],
 			[g[0], 'stop game'],
 		]);
+		logger.check('werewolf:kill 1 2\nwitch:poison 2 3\nspeech 1,4,5');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -88,9 +99,10 @@ try {
 			[p[1], 'pass'],
 			[g[0], 'stop game'],
 		]);
+		logger.check('werewolf:kill 1 2\nwitch:pass 2\nspeech 3,4,5,1')
 
 		// 预言家
-		global.game.setTemplate(['seer', 'werewolf', 'witch', 'villager']);
+		setTemplate('seer', 'werewolf', 'witch', 'villager');
 		{
 			let target = [true, false, true, true];
 			for (let i = 1; i <= target.length; i++) {
@@ -105,11 +117,12 @@ try {
 					[p[0], `suspect ${i}`],
 					[g[0], 'stop game'],
 				]);
+				logger.check(`werewolf:pass 2\nwitch:pass 3\nseer:suspect 1 ${i} ${i == 2 ? "bad" : "good"}\nspeech 1,2,3,4`);
 			}
 		}
 
 		// 猎人
-		global.game.setTemplate(['werewolf', 'hunter', 'villager', 'villager']);
+		setTemplate('werewolf', 'hunter', 'villager', 'villager');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -119,6 +132,7 @@ try {
 			[p[0], 'kill 2'],
 			[p[1], 'shoot 1'],
 		]);
+		logger.check('werewolf:kill 1 2\nhunter:shoot 2 1');
 		await utils.receiveByInterval(interval, [
 			[g[0], 'register'],
 			[g[1], 'register'],
@@ -136,6 +150,7 @@ try {
 			[p[3], 'vote 2'],
 			[p[1], 'shoot 1'],
 		]);
+		logger.check('werewolf:pass 1\nspeech 1,2,3,4\nhunter:shoot 2 1');
 	})();
 } catch (err) {
 	console.error(err);

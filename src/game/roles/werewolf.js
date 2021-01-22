@@ -29,18 +29,20 @@ class Werewolf extends Role {
 		}
 	}
 
-	kill(killer, targetPlayer) {
-		if (!killer || !killer.alive || !targetPlayer || !targetPlayer.alive || !this.nightResolver) {
-			killer.send('kill 命令不合法');
+	kill(player, targetPlayer) {
+		if (!player || !player.alive || !targetPlayer || !targetPlayer.alive || !this.nightResolver) {
+			player.send('kill 命令不合法');
 			return;
 		}
 
-		this.log('Kill', targetPlayer.displayName, 'by', killer.displayName);
 		for (const currentPlayer of this.playerList) {
-			currentPlayer.send(`${killer.displayName} 决定杀害 ${targetPlayer.displayName}`);
+			currentPlayer.send(`${player.displayName} 决定杀害 ${targetPlayer.displayName}`);
 		}
-
 		this.killedPlayer = targetPlayer;
+
+		this.log('Kill', targetPlayer.displayName, '(by ' + player.displayName + ')');
+		this.logger.push('werewolf:kill', player.place, targetPlayer.place);
+
 		this.nightResolver();
 		this.endTurn();
 	}
@@ -51,10 +53,12 @@ class Werewolf extends Role {
 			return;
 		}
 
-		this.log('Pass', 'by', player.displayName);
 		for (const currentPlayer of this.playerList) {
 			currentPlayer.send(`${player.displayName} 决定跳过本回合`);
 		}
+
+		this.log('pass', '(by ' + player.displayName + ')');
+		this.logger.push('werewolf:pass', player.place);
 
 		this.nightResolver();
 		this.endTurn();

@@ -368,6 +368,9 @@ class Game {
 		await this.sendGroup('发言完毕，请投票');
 
 		let voteResult = await this.voter.start();
+		if (!this.started) {
+			return;
+		}
 
 		if (voteResult.length !== 1) {
 			await this.sendGroup('第一轮投票没有结果，请进行第二轮发言');
@@ -402,6 +405,9 @@ class Game {
 			return;
 		}
 
+		this.started = true;
+		this.logger.reset();
+
 		for (const roleName in this.roles) {
 			const roleClass = this.roles[roleName];
 			roleClass.resetPlayer();
@@ -426,7 +432,6 @@ class Game {
 			}
 		}
 
-		this.started = true;
 		await this.processNight(1);
 	}
 
@@ -435,6 +440,7 @@ class Game {
 			await this.sendGroup('游戏尚未开始');
 			return;
 		}
+
 		if (!result) {
 			result = this.checkWinCondition();
 			if (!result.res) {
@@ -514,6 +520,12 @@ class Game {
 		await this.helper.listAllPlayers();
 	}
 
+	async log() {
+		this.log('Log');
+
+		await this.sendGroup(this.logger.get('\n'));
+	}
+
 	constructor(app, bot) {
 		this.app = app;
 		this.bot = bot;
@@ -523,6 +535,7 @@ class Game {
 		this.config = config;
 		this.templateList = config.templates;
 
+		this.logger = new Logger();
 		this.roles = {
 			werewolf: new Werewolf(this),
 			witch: new Witch(this),
@@ -530,7 +543,6 @@ class Game {
 			hunter: new Hunter(this),
 			villager: new Villager(this),
 		};
-		this.logger = new Logger();
 		this.voter = new Voter(this);
 		this.speech = new Speech(this);
 

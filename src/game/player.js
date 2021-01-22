@@ -73,6 +73,9 @@ class Player {
 		if (message === 'stop game') {
 			return this.game.stop();
 		}
+		if (message === 'log') {
+			return this.game.log();
+		}
 	}
 
 	async _waitForReceive(type, possibleMessages) {

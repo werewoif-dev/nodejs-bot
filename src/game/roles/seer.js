@@ -8,13 +8,16 @@ class Seer extends Role {
 			return;
 		}
 
-		this.log('Suspect', targetPlayer.displayName);
-
-		if (targetPlayer.role === 'werewolf') {
-			this.send(`${targetPlayer.displayName} 是坏人`);
+		let response;
+		if (targetPlayer.roleClass.isWolf()) {
+			response = true;
 		} else {
-			this.send(`${targetPlayer.displayName} 是好人`);
+			response = false;
 		}
+		this.send(`${targetPlayer.displayName} 是${response ? '坏' : '好'}人`);
+
+		this.log('Suspect', targetPlayer.displayName);
+		this.logger.push('seer:suspect', player.place, targetPlayer.place, response ? 'bad' : 'good');
 
 		this.suspectedPlayer = targetPlayer;
 
@@ -27,9 +30,10 @@ class Seer extends Role {
 			this.send('pass 命令不合法');
 			return;
 		}
+		this.send('你结束了你的回合');
 
 		this.log('Pass');
-		this.send('你结束了你的回合');
+		this.logger.push('seer:pass', player.place);
 
 		this.nightResolver();
 		this.endTurn();

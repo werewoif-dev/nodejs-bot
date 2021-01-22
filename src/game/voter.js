@@ -130,6 +130,13 @@ class Voter {
 		this.promise = null;
 	}
 
+	async stop() {
+		if (this.promise) {
+			this.promise.resolve();
+			this.promise = null;
+		}
+	}
+
 	constructor(game) {
 		this.game = game;
 

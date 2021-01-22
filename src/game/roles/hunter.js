@@ -9,10 +9,10 @@ class Hunter extends Role {
 		}
 
 		this.log('Shoot ', targetPlayer.displayName);
-
-		this.shotPlayer = targetPlayer;
+		this.logger.push('hunter:shoot', player.place, targetPlayer.place);
 
 		this.sendGroup(`${player.displayName} 翻枪带走了 ${targetPlayer.displayName}`);
+		this.shotPlayer = targetPlayer;
 
 		this.killedResolver();
 		this.endTurn();
@@ -24,7 +24,8 @@ class Hunter extends Role {
 			return;
 		}
 
-		this.log('Shoot ', targetPlayer.displayName);
+		this.log('Pass');
+		this.logger.push('hunter:pass', player.place);
 
 		this.killedResolver();
 		this.endTurn();
