@@ -1,3 +1,5 @@
+const assert = require('assert');
+
 class Speech {
 
 	async process(speechOrder) {
@@ -33,11 +35,16 @@ class Speech {
 		this.promise.resolve(false);
 	}
 
+	reset() {
+		this.promise = null;
+		this.currentPlayer = null;
+	}
+
 	constructor(game) {
 		this.game = game;
-		this.promise = null;
+		assert(this.game);
 
-		this.currentPlayer = null;
+		this.reset();
 	}
 }
 

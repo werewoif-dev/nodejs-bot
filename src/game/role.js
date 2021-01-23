@@ -2,7 +2,7 @@ const colors = require('colors/safe');
 const sleep = require('sleep-promise');
 const { Random } = require('koishi-utils');
 
-const utils = require('../utils');
+const utils = require('./utils');
 
 class Role {
 	log() {

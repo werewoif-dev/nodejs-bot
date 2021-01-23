@@ -1,3 +1,5 @@
+const assert = require('assert');
+
 class Voter {
 
 	log() {
@@ -45,11 +47,10 @@ class Voter {
 			return;
 		}
 
-		this.log('Vote', player.displayName, 'To', targetPlayer.displayName);
-
 		this.result[String(player.id)] = targetPlayer;
+		
+		this.log('Vote', player.displayName, 'To', targetPlayer.displayName);
 		player.send(`你投票给了 ${targetPlayer.displayName}`);
-
 		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countAlivePlayer()}`);
 
 		if (this.isEnd()) {
@@ -72,16 +73,18 @@ class Voter {
 			return;
 		}
 
-		this.log('Pass', player.displayName);
-
 		this.result[String(player.id)] = null;
+		
+		this.log('Pass', player.displayName);
 		player.send('你放弃了你的投票权');
+		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countAlivePlayer()}`);
+		
 		if (this.isEnd()) {
 			this.end();
 		}
 	}
 
-	start() {
+	process() {
 		if (this.promise) {
 			console.error('ERROR! A vote is already started!');
 			return;
@@ -137,10 +140,14 @@ class Voter {
 		}
 	}
 
+	reset() {
+		this.promise = null;
+	}
+
 	constructor(game) {
 		this.game = game;
-
-		this.promise = null;
+		assert(this.game);
+		this.reset();
 	}
 }
 

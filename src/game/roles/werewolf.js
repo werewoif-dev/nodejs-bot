@@ -1,5 +1,5 @@
 const Role = require('../role');
-const utils = require('../../utils.js');
+const utils = require('../utils');
 const config = require('../../../config');
 
 class Werewolf extends Role {
