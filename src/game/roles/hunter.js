@@ -20,7 +20,7 @@ class Hunter extends Role {
 
 	pass(player) {
 		if (!this.killedResolver) {
-			this.send('shoot 命令不合法');
+			this.send('pass 命令不合法');
 			return;
 		}
 

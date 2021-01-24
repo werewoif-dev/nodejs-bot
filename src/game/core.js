@@ -276,14 +276,15 @@ class Game {
 		if (this.roles.witch.poisonedPlayer) {
 			diedPlayerList.push(this.roles.witch.poisonedPlayer);
 		}
+		let hasBoomed = false;
+		if (config.query('rule.sheriff', false) && (roundId === 1 || (roundId === 2 && this.sheriff.crashed))) {
+			hasBoomed = !await this.sheriff.runForTheSheriff();
+		}
+
 		for (const currentPlayer of diedPlayerList) {
 			currentPlayer.alive = false;
 		}
 		utils.random.shuffle(diedPlayerList);
-
-		if (config.query('rule.sheriff', false) && (roundId === 1 || (roundId === 2 && this.sheriff.crashed))) {
-			await this.sheriff.runForTheSheriff();
-		}
 
 		let message = `第 ${roundId} 个晚上结束了，`;
 		if (diedPlayerList.length === 0) {
@@ -293,7 +294,7 @@ class Game {
 		} else if (diedPlayerList.length === 2) {
 			message += `今天晚上 [CQ:at,qq=${diedPlayerList[0].id}] 和 [CQ:at,qq=${diedPlayerList[1].id}] 死了`;
 		}
-		if (roundId === 1 && diedPlayerList.length !== 0) {
+		if (roundId === 1 && diedPlayerList.length !== 0 && !hasBoomed) {
 			message += '，请留遗言';
 		}
 		await this.sendGroup(message);
@@ -304,6 +305,8 @@ class Game {
 
 		if (this.checkWinCondition().res) {
 			await this.stop();
+		} else if (hasBoomed) {
+			await this.processNight(roundId + 1);
 		} else {
 			await this.processDay(roundId, diedPlayerList);
 		}
@@ -349,7 +352,7 @@ class Game {
 			} else {
 				await this.sendGroup('请警长选择警左警右发言');
 				let side = await this.sheriff.get().waitForReceiveGroup(['left', 'right']);
-				speechOrder = generateSpeechOrder(this.sheriff, side);
+				speechOrder = generateSpeechOrder(this.sheriff.get(), side);
 			}
 		} else {
 			await this.sendGroup('本局游戏没有警长，采取随机顺序发言');
@@ -368,6 +371,7 @@ class Game {
 		if (await this.speech.process(speechOrder)) {
 			await this.sendGroup('发言完毕，请投票');
 
+			this.voter.votablePlayers = this.voter.targets = alivePlayerList.map(player => player.id);
 			let voteResult = await this.voter.process();
 
 			if (voteResult.length !== 1) {
@@ -527,12 +531,6 @@ class Game {
 		await this.helper.listAllPlayers();
 	}
 
-	async log() {
-		this.log('Log');
-
-		await this.sendGroup(this.logger.get('\n'));
-	}
-
 	constructor(app, bot) {
 		this.app = app;
 		this.bot = bot;
@@ -578,7 +576,9 @@ class Game {
 				message += '本轮票型：';
 				for (const player of this.playerList) {
 					const targetPlayer = voteResult[player.id];
-					message += `\n${player.displayName} → ${targetPlayer ? targetPlayer.displayName : null}`;
+					if (targetPlayer !== undefined) {
+						message += `\n${player.displayName} → ${targetPlayer ? targetPlayer.displayName : null}`;
+					}
 				}
 				message += '\n本轮票数统计：';
 				for (const playerId in countResult) {

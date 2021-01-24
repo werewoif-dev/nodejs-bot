@@ -8,7 +8,7 @@ class Speech {
 			this.promise = { resolve, reject };
 			await this.game.sendGroup(
 				'本轮发言顺序：\n' +
-				speechOrder.map((player, index) => (String.fromCharCode('a'.charCodeAt(0) + index) + '. ' + player.displayName))
+				speechOrder.map((player, index) => (String.fromCharCode('a'.charCodeAt(0) + index) + '. ' + player.displayName)).join('\n')
 			);
 			for (const currentPlayer of speechOrder) {
 				this.currentPlayer = currentPlayer;

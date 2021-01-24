@@ -105,6 +105,7 @@ class Role {
 						await sleep(150);
 						this.send('决策超时，自动结算');
 						resolver();
+						this.endTurn();
 					}
 				} else {
 					return;

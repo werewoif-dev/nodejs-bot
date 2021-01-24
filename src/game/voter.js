@@ -10,18 +10,12 @@ class Voter {
 		return Object.keys(this.result).length
 	}
 
-	countAlivePlayer() {
-		let alivePlayerNumber = 0;
-		for (const player of this.game.playerList) {
-			if (player.alive) {
-				alivePlayerNumber += 1;
-			}
-		}
-		return alivePlayerNumber;
+	countVotablePlayer() {
+		return this.votablePlayers.length;
 	}
 
 	isEnd() {
-		if (this.countAlivePlayer() === this.countResult()) {
+		if (this.countVotablePlayer() === this.countResult()) {
 			return true;
 		} else {
 			return false;
@@ -33,11 +27,11 @@ class Voter {
 			player.send('投票未开始');
 			return;
 		}
-		if (!player.alive) {
-			player.send('你已出局，没有投票权限');
+		if (!this.votablePlayers.includes(player.id)) {
+			player.send('你没有投票权限');
 			return;
 		}
-		if (!targetPlayer || !targetPlayer.alive) {
+		if (!targetPlayer || !this.targets.includes(targetPlayer.id)) {
 			player.send('投票不合法');
 			return;
 		}
@@ -51,7 +45,7 @@ class Voter {
 		
 		this.log('Vote', player.displayName, 'To', targetPlayer.displayName);
 		player.send(`你投票给了 ${targetPlayer.displayName}`);
-		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countAlivePlayer()}`);
+		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countVotablePlayer()}`);
 
 		if (this.isEnd()) {
 			this.end();
@@ -63,7 +57,7 @@ class Voter {
 			player.send('投票未开始');
 			return;
 		}
-		if (!player.alive) {
+		if (!this.votablePlayers.includes(player.id)) {
 			player.send('你没有投票权限');
 			return;
 		}
@@ -77,7 +71,7 @@ class Voter {
 		
 		this.log('Pass', player.displayName);
 		player.send('你放弃了你的投票权');
-		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countAlivePlayer()}`);
+		this.game.sendGroup(`${player.displayName} 完成投票，当前投票情况 ${this.countResult()} / ${this.countVotablePlayer()}`);
 		
 		if (this.isEnd()) {
 			this.end();
@@ -93,20 +87,24 @@ class Voter {
 		return new Promise((resolve, reject) => {
 			this.promise = { resolve, reject };
 			this.result = {};
+			if (this.isEnd()) {
+				this.end();
+			}
 		});
 	}
 
 	async end() {
+		const sheriffId = this.game.sheriff.exists() ? String(this.game.sheriff.get().id) : null;
 		let voteCounter = {};
 		let countResult = [];
 		for (const playerId in this.result) {
-			const targetPlayer = this.result[playerId];
+			const targetPlayer = this.result[playerId], weight = playerId === sheriffId ? 1.5 : 1;
 			if (targetPlayer) {
 				if (voteCounter[targetPlayer.id]) {
-					voteCounter[targetPlayer.id] += 1;
+					voteCounter[targetPlayer.id] += weight;
 					countResult[targetPlayer.id].push(this.game.getPlayer(playerId));
 				} else {
-					voteCounter[targetPlayer.id] = 1;
+					voteCounter[targetPlayer.id] = weight;
 					countResult[targetPlayer.id] = [this.game.getPlayer(playerId)];
 				}
 			}
@@ -147,6 +145,8 @@ class Voter {
 	constructor(game) {
 		this.game = game;
 		assert(this.game);
+		this.votablePlayers = [];
+		this.targets = [];
 		this.reset();
 	}
 }
