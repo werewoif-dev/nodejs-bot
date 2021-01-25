@@ -31,7 +31,7 @@ class Voter {
 			player.send('你没有投票权限');
 			return;
 		}
-		if (!targetPlayer || !this.targets.includes(targetPlayer.id)) {
+		if (!targetPlayer || !this.targetPlayers.includes(targetPlayer.id)) {
 			player.send('投票不合法');
 			return;
 		}
@@ -78,11 +78,14 @@ class Voter {
 		}
 	}
 
-	process() {
+	process(votablePlayers = null, targetPlayers = null) {
 		if (this.promise) {
 			console.error('ERROR! A vote is already started!');
 			return;
 		}
+		
+		this.votablePlayers = votablePlayers || this.game.playerList;
+		this.targetPlayers = targetPlayers || this.game.playerList;
 
 		return new Promise((resolve, reject) => {
 			this.promise = { resolve, reject };
@@ -146,7 +149,7 @@ class Voter {
 		this.game = game;
 		assert(this.game);
 		this.votablePlayers = [];
-		this.targets = [];
+		this.targetPlayers = [];
 		this.reset();
 	}
 }

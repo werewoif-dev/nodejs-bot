@@ -1,5 +1,4 @@
-const shuffleArray = require('shuffle-array');
-const sleep = require('sleep-promise');
+const lodash = require('lodash');
 
 const config = require('../../config');
 
@@ -23,7 +22,7 @@ const utils = {
 			if (app.test) {
 				return;
 			}
-			shuffleArray(array);
+			array = lodash.shuffle(array);
 		},
 
 		key() {

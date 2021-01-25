@@ -147,7 +147,7 @@ class Game {
 			let counter
 			flag = false;
 			for (const player of this.playerList) {
-				if (player.role !== 'werewolf' && player.alive) {
+				if (!player.roleClass.isWolf() && player.alive) {
 					flag = true;
 				}
 			}
@@ -160,7 +160,7 @@ class Game {
 			}
 			flag = false;
 			for (const player of this.playerList) {
-				if (player.role === 'werewolf' && player.alive) {
+				if (player.roleClass.isWolf() && player.alive) {
 					flag = true;
 				}
 			}
@@ -174,7 +174,7 @@ class Game {
 			counter = 0;
 			for (const player of this.playerList) {
 				if (player.alive) {
-					if (player.role === 'werewolf') {
+					if (player.roleClass.isWolf()) {
 						counter++;
 					} else {
 						counter--;
@@ -212,7 +212,7 @@ class Game {
 			flag_1 = false;
 			flag_2 = false;
 			for (const player of this.playerList) {
-				if (player.role !== 'werewolf' && player.role !== 'villager') {
+				if (!player.roleClass.isWolf() && player.role !== 'villager') {
 					flag_1 = true;
 					if (player.alive) {
 						flag_2 = true;
@@ -228,7 +228,7 @@ class Game {
 			}
 			flag_2 = false;
 			for (const player of this.playerList) {
-				if (player.role === 'werewolf' && player.alive) {
+				if (player.roleClass.isWolf() && player.alive) {
 					flag_2 = true;
 				}
 			}

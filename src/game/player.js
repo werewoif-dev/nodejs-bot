@@ -13,22 +13,6 @@ function parseCommand(message) {
 
 class Player {
 
-	getId() {
-		return this.id;
-	}
-
-	getNick() {
-		return this.nick;
-	}
-
-	getRole() {
-		return this.role;
-	}
-
-	getPlace() {
-		return this.place;
-	}
-
 	send(message) {
 		console.log(colors.cyan('[SEND P]'), this.id, message.slice(0, 40).replace(/\n/g, colors.grey('\\n')), message.length > 40 ? colors.grey('...') : '');
 		this.game.bot.sendPrivateMsg(this.id, message);
@@ -62,11 +46,12 @@ class Player {
 	}
 
 	receiveGroup(message) {
+		console.log(colors.magenta('[RECEIVE G]'), this.displayName, message);
 		if (this.promise.group && this.promise.group.data.possibleMessages.includes(message)) {
 			this.promise.group.resolve(message);
 			this.promise.group = null;
+			return;
 		}
-		console.log(colors.magenta('[RECEIVE G]'), this.displayName, message);
 		if (message === 'status') {
 			return this.game.status();
 		}

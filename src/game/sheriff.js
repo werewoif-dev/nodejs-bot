@@ -1,6 +1,7 @@
 const assert = require('assert');
 const lodash = require('lodash');
 
+const Voter = require('./voter');
 const utils = require('./utils');
 
 class Sheriff {
@@ -21,10 +22,12 @@ class Sheriff {
 
 	async runForTheSheriff() {
 		await this.game.sendGroup('现在进行警长竞选，上警的玩家请举手');
+		
 		const alivePlayerList = this.game.getAlivePlayerList();
 		const receivedMessage = await Promise.all(alivePlayerList.map(player => player.waitForReceive(['pass', 'raise'])));
 		const registeredPlayerList = lodash.filter(alivePlayerList, (_, index) => receivedMessage[index] === 'raise');
 		const unregisteredPlayerList = lodash.filter(alivePlayerList, (_, index) => receivedMessage[index] === 'pass');
+
 		if (!await this.speech.process(this.generateSpeechOrder(registeredPlayerList))) {
 			if (this.crashed) {
 				await this.game.sendGroup('由于狼队的两连爆，本轮游戏没有警长');
@@ -32,9 +35,11 @@ class Sheriff {
 			this.crashed = true;
 			return false;
 		}
-		this.voter.votablePlayers = unregisteredPlayerList.map(player => player.id);
-		this.voter.targets = registeredPlayerList.map(player => player.id);
-		let voteResult = await this.voter.process();
+		
+		const votablePlayers = unregisteredPlayerList.map(player => player.id);
+		const targetPlayers = registeredPlayerList.map(player => player.id);
+
+		let voteResult = await this.voter.process(votablePlayers, targetPlayers);
 		if (voteResult.length !== 1) {
 			if (!await this.speech.process(this.generateSpeechOrder(voteResult))) {
 				if (this.crashed) {
@@ -46,6 +51,7 @@ class Sheriff {
 				voteResult = await this.voter.process();
 			}
 		}
+		
 		if (!voteResult || voteResult.length !== 1) {
 			await this.game.sendGroup('由于村民们的意见难以统一，本轮游戏没有警长');
 			return true;
