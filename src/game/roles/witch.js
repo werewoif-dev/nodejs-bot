@@ -15,6 +15,7 @@ class Witch extends Role {
 
 		this.send(`你用毒药杀了 ${targetPlayer.displayName} 并结束了你的操作回合`);
 		this.poisonedPlayer = targetPlayer;
+		this.poisoned = true;
 
 		this.log('Poison', targetPlayer.displayName);
 		this.logger.push('witch:poison', player.place, targetPlayer.place);
@@ -46,6 +47,7 @@ class Witch extends Role {
 
 		this.send(`你用解药救了 ${targetPlayer.displayName} 并结束了你的操作回合`);
 		this.savedPlayer = targetPlayer;
+		this.saved = true;
 
 		this.log('Save', targetPlayer.displayName);
 		this.logger.push('witch:save', player.place, targetPlayer.place);

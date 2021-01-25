@@ -37,7 +37,9 @@ class Player {
 	receive(message) {
 		console.log(colors.magenta('[RECEIVE P]'), this.displayName, message);
 		if (this.promise.private && this.promise.private.data.possibleMessages.includes(message)) {
-			return this.promise.private.resolve(message);
+			this.promise.private.resolve(message);
+			this.promise.private = null;
+			return;
 		}
 		const { command, targetPlayer, fit } = parseCommand(message);
 		if (this.game.voter.promise) {
@@ -54,14 +56,15 @@ class Player {
 				return this.roleClass[command](this, targetPlayer);
 			}
 		}
-		if (this.roleClass.isWolf() && message.startsWith('# ')) {
+		if (this.role && this.roleClass.isWolf() && message.startsWith('# ')) {
 			return this.roleClass.chat(this, message.slice(2));
 		}
 	}
 
 	receiveGroup(message) {
 		if (this.promise.group && this.promise.group.data.possibleMessages.includes(message)) {
-			return this.promise.group.resolve(message);
+			this.promise.group.resolve(message);
+			this.promise.group = null;
 		}
 		console.log(colors.magenta('[RECEIVE G]'), this.displayName, message);
 		if (message === 'status') {
@@ -142,7 +145,7 @@ class Player {
 		}
 
 		this.promise = {
-			priavte: null,
+			private: null,
 			group: null,
 		};
 	}
